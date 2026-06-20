@@ -44,7 +44,7 @@ total_hpk = df_hutan["Hutan Produksi Konversi (ha)"].sum()
 total_luas_provinsi = df_hutan["Total Kawasan Hutan (ha)"].sum()
 
 # =====================
-# LOGO & HEADER
+# LOGO, JUDUL UTAMA & IDENTITAS KELOMPOK
 # =====================
 
 try:
@@ -53,17 +53,26 @@ try:
 except:
     has_logo = False
 
-col1, col2 = st.columns([1,5])
+col_header1, col_header2 = st.columns([1, 5])
 
-with col1:
+with col_header1:
     if has_logo:
-        st.image(logo, width=120)
+        st.image(logo, width=110)
     else:
         st.warning("Logo tidak ditemukan")
 
-with col2:
+with col_header2:
     st.title("ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN")
     st.write("Project Based Learning Ekonomi Sumber Daya Alam dan Lingkungan")
+    
+    # Penempatan struktur data identitas kelompok di bawah judul utama
+    col_k1, col_k2, col_k3 = st.columns(3)
+    with col_k1:
+        st.caption("Anggota 1: **Ina Rani Amelia** (NPM: 10090224002)")
+    with col_k2:
+        st.caption("Anggota 2: **Nayla Dwi Safitri** (NPM: 10090224013)")
+    with col_k3:
+        st.caption("Anggota 3: **Celi Maulidi Aprilia** (NPM: 10090224027)")
 
 st.divider()
 
@@ -101,17 +110,6 @@ if menu == "Beranda":
 
     st.write("Dashboard ini menyajikan data spasial dan valuasi ekonomi kehutanan Kalimantan Selatan.")
     st.dataframe(df_hutan.drop(columns=["Total Kawasan Hutan (ha)"]), use_container_width=True)
-    
-    st.divider()
-    st.subheader("Identitas Anggota Kelompok")
-    col_k1, col_k2, col_k3 = st.columns(3)
-    
-    with col_k1:
-        st.info("Anggota 1  \n**Ina Rani Amelia** \nNPM: 10090224002")
-    with col_k2:
-        st.success("Anggota 2  \n**Nayla Dwi Safitri** \nNPM: 10090224013")
-    with col_k3:
-        st.warning("Anggota 3  \n**Celi Maulidi Aprilia** \nNPM: 10090224027")
 
 # =====================
 # FUNGSI HUTAN
@@ -183,7 +181,7 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.dataframe(data_wisata, use_container_width=True)
 
 # =====================
-# KALKULATOR TEV (SIMULASI DINAMIS)
+# KALKULATOR TEV
 # =====================
 
 elif menu == "Kalkulator TEV":
