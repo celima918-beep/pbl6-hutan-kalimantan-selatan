@@ -110,8 +110,8 @@ if menu == "Beranda":
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Luas Hutan", f"{total_luas_provinsi:,.2f} ha")
     col2.metric("Hutan Lindung Terluas", "Kotabaru")
-    col3.metric("Cadangan Karbon", "172 Juta Ton")
-    col4.metric("Destinasi Wisata", "5 Lokasi Utama")
+    col3.metric("Cadangan Karbon (2024)", "113 Juta Ton")
+    col4.metric("Total Pengunjung Wisata", "425 Ribu Orang/Tahun")
 
     st.write("Dashboard ini menyajikan data spasial dan valuasi ekonomi kehutanan Kalimantan Selatan.")
     st.dataframe(df_hutan.drop(columns=["Total Kawasan Hutan (ha)"]), use_container_width=True)
@@ -124,7 +124,7 @@ if menu == "Beranda":
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
     
-    deskripsi_beranda = "Menu Beranda menyajikan gambaran umum mengenai profil fisik kawasan kehutanan di Kalimantan Selatan berdasarkan basis data Badan Pusat Statistik. Data mencakup agregasi total luas hutan dan sebaran spasial pada level kabupaten atau kota."
+    deskripsi_beranda = "Menu Beranda menyajikan gambaran umum mengenai profil fisik kawasan kehutanan di Kalimantan Selatan berdasarkan data Badan Pusat Statistik. Data mencakup agregasi total luas hutan dan sebaran spasial pada level kabupaten atau kota."
     
     analisis_beranda = f"""
     <div style="background-color: #F0FDF4; padding: 20px; border-left: 6px solid #16A34A; border-radius: 4px;">
@@ -188,48 +188,69 @@ elif menu == "Fungsi Hutan":
     st.markdown(analisis_fungsi, unsafe_allow_html=True)
 
 # =====================
-# PROFIL SDA & JASA LINGKUNGAN
+# PROFIL SDA & JASA LINGKUNGAN (INTEGRASI DATA BARU)
 # =====================
 
 elif menu == "Profil SDA & Jasa Lingkungan":
     st.header("Profil Sumber Daya Alam dan Jasa Lingkungan")
-    st.write("Potensi kekayaan hayati, kapasitas karbon, dan objek wisata alam hutan Kalimantan Selatan.")
+    st.write("Potensi kekayaan keanekaragaman hayati riil, kapasitas emisi serapan karbon, dan statistik industri ekowisata.")
     st.divider()
     
+    # 1. Biodiversitas (Data Baru Lampiran 1)
     st.subheader("1. Keanekaragaman Hayati (Biodiversitas)")
-    col_bio1, col_bio2 = st.columns([1, 2])
-    with col_bio1:
-        data_bio = pd.DataFrame({
-            "Kategori": ["Flora", "Fauna"],
-            "Jumlah Kerapatan Spesies": [3000, 500]
-        })
-        st.dataframe(data_bio, use_container_width=True)
-    with col_bio2:
-        fig_bio = px.bar(data_bio, x="Kategori", y="Jumlah Kerapatan Spesies", title="Perbandingan Kerapatan Spesies Kehutanan", color="Kategori", color_discrete_sequence=px.colors.qualitative.Set2)
-        st.plotly_chart(fig_bio, use_container_width=True)
-        
-    st.divider()
-    st.subheader("2. Kapasitas Volumetrik Cadangan Karbon")
-    col_kar1, col_kar2 = st.columns([1, 2])
-    with col_kar1:
-        data_karbon = pd.DataFrame({
-            "Kategori Parameter": ["Cadangan Karbon Tetap", "Serapan Karbon Tahunan"],
-            "Volume (Ton)": [172000000, 6400000]
-        })
-        st.dataframe(data_karbon, use_container_width=True)
-    with col_kar2:
-        fig_karbon = px.pie(data_karbon, names="Kategori Parameter", values="Volume (Ton)", title="Proporsi Distribusi Aspek Karbon", color_discrete_sequence=px.colors.sequential.Aggrnyl)
-        st.plotly_chart(fig_karbon, use_container_width=True)
-        
-    st.divider()
-    st.subheader("3. Jasa Lingkungan Wisata Rekreasi Alam")
-    data_wisata = pd.DataFrame({
-        "Destinasi": ["Loksado", "Tahura Sultan Adam", "Pegunungan Meratus", "Air Terjun Haratai", "Pulau Kembang"],
-        "Kawasan Administratif": ["Hulu Sungai Selatan", "Banjar/Banjarbaru", "Hulu Sungai Tengah", "Hulu Sungai Selatan", "Barito Kuala"]
-    })
-    st.dataframe(data_wisata, use_container_width=True)
+    col_bio1, col_bio2 = st.columns(2)
     
-    stok_karbon = data_karbon.iloc[0]["Volume (Ton)"]
+    with col_bio1:
+        st.markdown("**Kekayaan Spesies Flora**")
+        df_flora = pd.DataFrame({
+            "Kelompok Famili": ["Dipterocarpaceae", "Myrtaceae", "Fabaceae", "Poaceae", "Orchidaceae"],
+            "Jumlah Jenis": [420, 310, 280, 260, 190]
+        })
+        st.dataframe(df_flora, use_container_width=True)
+        fig_flora = px.bar(df_flora, x="Jumlah Jenis", y="Kelompok Famili", orientation="h", title="Distribusi Famili Flora", color="Kelompok Famili", color_discrete_sequence=px.colors.sequential.Mint)
+        st.plotly_chart(fig_flora, use_container_width=True)
+        
+    with col_bio2:
+        st.markdown("**Kekayaan Spesies Fauna**")
+        df_fauna = pd.DataFrame({
+            "Kelompok Taksonomi": ["Burung", "Ikan Air Tawar", "Mamalia", "Reptil", "Amfibi"],
+            "Jumlah Spesies": [310, 120, 72, 68, 45]
+        })
+        st.dataframe(df_fauna, use_container_width=True)
+        fig_fauna = px.bar(df_fauna, x="Jumlah Spesies", y="Kelompok Taksonomi", orientation="h", title="Distribusi Kelompok Fauna", color="Kelompok Taksonomi", color_discrete_sequence=px.colors.sequential.Oranges)
+        st.plotly_chart(fig_fauna, use_container_width=True)
+        
+    st.divider()
+    
+    # 2. Emisi & Serapan Karbon (Data Baru Lampiran 2)
+    st.subheader("2. Kapasitas Volumetrik Keseimbangan Karbon Berkelanjutan")
+    df_karbon = pd.DataFrame({
+        "Tahun": ["2019", "2020", "2021", "2022", "2023", "2024"],
+        "Emisi CO2 (Juta Ton)": [42, 45, 47, 49, 52, 54],
+        "Serapan Karbon (Juta Ton)": [110, 108, 112, 109, 111, 113]
+    })
+    st.dataframe(df_karbon, use_container_width=True)
+    
+    fig_karbon_tren = px.line(df_karbon, x="Tahun", y=["Emisi CO2 (Juta Ton)", "Serapan Karbon (Juta Ton)"], markers=True, title="Tren Perbandingan Emisi Keseimbangan Karbon Tahunan", color_discrete_sequence=["#DC2626", "#16A34A"])
+    st.plotly_chart(fig_karbon_tren, use_container_width=True)
+    
+    st.divider()
+    
+    # 3. Wisata Hutan (Data Baru Lampiran 3)
+    st.subheader("3. Jasa Lingkungan Wisata Rekreasi Alam")
+    df_wisata = pd.DataFrame({
+        "Destinasi": ["Tahura Sultan Adam", "Pulau Kembang", "Loksado", "Air Terjun Haratai", "Meratus Trek"],
+        "Kabupaten Administratif": ["Banjar", "Barito Kuala", "Hulu Sungai Selatan", "Hulu Sungai Selatan", "Hulu Sungai Tengah"],
+        "Pengunjung (Ribu Orang/Tahun)": [120, 95, 85, 70, 60]
+    })
+    st.dataframe(df_wisata, use_container_width=True)
+    
+    fig_wisata = px.pie(df_wisata, names="Destinasi", values="Pengunjung (Ribu Orang/Tahun)", title="Pangsa Pasar Kunjungan Destinasi Ekowisata Hutan", color_discrete_sequence=px.colors.sequential.YlGnBu)
+    st.plotly_chart(fig_wisata, use_container_width=True)
+    
+    total_spesies_flora = df_flora["Jumlah Jenis"].sum()
+    total_spesies_fauna = df_fauna["Jumlah Spesies"].sum()
+    net_serapan_2024 = df_karbon.iloc[-1]["Serapan Karbon (Juta Ton)"] - df_karbon.iloc[-1]["Emisi CO2 (Juta Ton)"]
     
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
@@ -240,8 +261,8 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     <div style="background-color: #F0FDF4; padding: 20px; border-left: 6px solid #16A34A; border-radius: 4px;">
         <h4 style="color: #166534; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Kekayaan biodiversitas dan volume cadangan karbon sebesar <span style="color: #15803D; font-weight: bold;">{stok_karbon:,.0f} ton</span> 
-            membuktikan bahwa nilai ekologis hutan jauh melampaui nilai komoditas kayu domestik. Jasa lingkungan non-ekstraktif seperti objek wisata Tahura Sultan Adam dan Loksado merupakan penggerak ekonomi baru yang minim emisi. Pengembangan sektor ekowisata ini harus dikelola secara ketat menggunakan analisis batas ambang daya dukung lingkungan. Langkah tersebut diperlukan agar aktivitas rekreasi massal tidak merusak kelestarian ekosistem dan menurunkan kualitas keanekaragaman hayati lokal.
+            Kekayaan biodiversitas sebanyak <span style="color: #15803D; font-weight: bold;">{total_spesies_flora} jenis flora</span> 
+            dan <span style="color: #15803D; font-weight: bold;">{total_spesies_fauna} jenis fauna</span> membuktikan tingginya nilai modal alam intrinsik kawasan. Berdasarkan neraca asimilasi karbon tahun 2024, kapasitas penyerapan vegetasi hutan masih surplus dengan net asimilasi sebesar <span style="color: #111827; font-weight: bold;">{net_serapan_2024} juta ton CO2</span>. Fungsi penyerapan gas rumah kaca ini bertindak sebagai subsidi ekologis gratis bagi aktivitas industri daerah. Jasa lingkungan non-ekstraktif seperti objek wisata Tahura Sultan Adam yang mampu menarik <span style="color: #1D4ED8; font-weight: bold;">120 ribu pengunjung</span> merupakan substitusi mesin pertumbuhan ekonomi baru yang potensial. Investasi pada sektor pariwisata berbasis jasa alam ini wajib dikembangkan guna menggeser ketergantungan fiskal daerah dari sektor industri pertambangan yang merusak lingkungan.
         </p>
     </div>
     """
@@ -251,7 +272,7 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.markdown(analisis_sda, unsafe_allow_html=True)
 
 # =====================
-# KALKULATOR TEV (DINAMIS & KOTAK MENONJOL)
+# KALKULATOR TEV
 # =====================
 
 elif menu == "Kalkulator TEV":
@@ -325,13 +346,40 @@ elif menu == "Kalkulator TEV":
     st.markdown(analisis_tev, unsafe_allow_html=True)
 
 # =====================
-# ANALISIS TRADE-OFF (DINAMIS & KOTAK MENONJOL)
+# ANALISIS TRADE-OFF (INTEGRASI DATA BARU DEFORESTASI & RISIKO)
 # =====================
 
 elif menu == "Analisis Trade-Off":
-    st.subheader("Simulasi Substitusi Lahan")
+    st.header("Analisis Trade-Off Substitusi Lahan dan Kebijakan Makro")
+    st.write("Analisis tren akumulasi kerusakan akibat deforestasi hutan serta dampaknya terhadap peningkatan risiko bencana hidrometeorologi.")
+    st.divider()
     
-    st.subheader("Sesuaikan Bobot Prioritas Kebijakan Jangka Panjang")
+    col_to1, col_to2 = st.columns(2)
+    
+    with col_to1:
+        # 4. Deforestasi (Data Baru Lampiran 4)
+        st.subheader("Tren Akumulasi Kehilangan Hutan (Deforestasi)")
+        df_defor = pd.DataFrame({
+            "Tahun": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"],
+            "Kehilangan Hutan (ha)": [18500, 21000, 19500, 18000, 17500, 16000, 15000, 14500, 14000, 13800]
+        })
+        st.dataframe(df_defor, use_container_width=True)
+        fig_defor = px.bar(df_defor, x="Tahun", y="Kehilangan Hutan (ha)", title="Luas Deforestasi Hutan Tahunan (Hektar)", color_discrete_sequence=["#EF4444"])
+        st.plotly_chart(fig_defor, use_container_width=True)
+        
+    with col_to2:
+        # 5. Risiko Lingkungan (Data Baru Lampiran 5)
+        st.subheader("Korelasi Risiko Indikator Lingkungan")
+        df_risiko = pd.DataFrame({
+            "Tahun": ["2019", "2020", "2021", "2022", "2023", "2024"],
+            "Hotspot Kebakaran": [1500, 900, 1100, 1400, 1600, 1000],
+            "Kejadian Banjir": [55, 80, 72, 68, 75, 70]
+        })
+        st.dataframe(df_risiko, use_container_width=True)
+        fig_risiko = px.scatter(df_risiko, x="Hotspot Kebakaran", y="Kejadian Banjir", text="Tahun", size="Kejadian Banjir", title="Matriks Korelasi Kebakaran Hutan dan Intensitas Banjir", color_discrete_sequence=["#D97706"])
+        st.plotly_chart(fig_risiko, use_container_width=True)
+        
+    st.subheader("Simulasi Penentuan Bobot Prioritas Kebijakan Jangka Panjang")
     bobot_konservasi = st.slider("Fokus Terhadap Kompensasi Ekologis Jangka Panjang (%)", min_value=10, max_value=100, value=95, step=5)
     
     kelayakan_sawit = int(bobot_konservasi * 0.68)
@@ -342,16 +390,11 @@ elif menu == "Analisis Trade-Off":
         "Nilai Kelayakan (%)": [bobot_konservasi, kelayakan_sawit, kelayakan_kayu]
     })
 
-    fig = px.bar(
-        tradeoff, 
-        x="Nilai Kelayakan (%)", 
-        y="Skenario", 
-        orientation="h", 
-        title="Perbandingan Nilai Kelayakan Antar Skenario", 
-        color="Skenario",
-        color_discrete_sequence=px.colors.qualitative.Bold
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    fig_bar_to = px.bar(tradeoff, x="Nilai Kelayakan (%)", y="Skenario", orientation="h", title="Perbandingan Nilai Kelayakan Antar Skenario Kebijakan", color="Skenario", color_discrete_sequence=px.colors.qualitative.Bold)
+    st.plotly_chart(fig_bar_to, use_container_width=True)
+    
+    total_deforestasi = df_defor["Kehilangan Hutan (ha)"].sum()
+    total_banjir = df_risiko["Kejadian Banjir"].sum()
     
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
@@ -362,9 +405,7 @@ elif menu == "Analisis Trade-Off":
     <div style="background-color: #FFFBEB; padding: 20px; border-left: 6px solid #D97706; border-radius: 4px;">
         <h4 style="color: #92400E; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, 
-            skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> 
-            dan pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Penurunan kelayakan pada opsi ekstraktif dipicu oleh tingginya biaya eksternalitas yang harus ditanggung masyarakat akibat bencana banjir dan hilangnya hilir sirkulasi air bersih. Skenario Hutan Lestari terbukti menghasilkan keberlanjutan ekonomi tertinggi karena menjaga stabilitas modal alam. Transformasi kebijakan dari eksploitasi menuju restorasi terencana merupakan keputusan rasional demi meminimalkan depresiasi kekayaan alam daerah.
+            Akumulasi kerusakan lahan akibat pembukaan hutan sepanjang dekade terakhir sangat masif dengan total kehilangan mencapai <span style="color: #B91C1C; font-weight: bold;">{total_deforestasi:,.0f} hektar</span> tutupan rimba. Dampak degradasi fisik ini berkorelasi langsung terhadap tingginya frekuensi bencana eksternalitas negatif dengan catatan total <span style="color: #B91C1C; font-weight: bold;">{total_banjir} kali kejadian banjir</span> merusak pemukiman warga. Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> dan pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Angka ini secara ilmiah menunjukkan bahwa pilihan pembangunan ekstraktif tidak lagi layak dipertahankan karena memicu marginal cost sosial yang jauh lebih besar daripada revenue finansial privat yang dihasilkan.
         </p>
     </div>
     """
@@ -374,17 +415,17 @@ elif menu == "Analisis Trade-Off":
     st.markdown(analisis_tradeoff, unsafe_allow_html=True)
 
 # =====================
-# PES (DINAMIS & KOTAK MENONJOL)
+# PES
 # =====================
 
 elif menu == "PES":
     st.subheader("Simulasi Imbal Jasa Lingkungan")
     
-    karbon_input = st.number_input("Cadangan Karbon (Ton)", value=172000000)
-    harga_input = st.number_input("Harga Karbon (Rp/Ton)", value=150000)
+    karbon_input = st.number_input("Cadangan Karbon Terfiksasi (Ton)", value=113000000)
+    harga_input = st.number_input("Harga Karbon Berdasarkan Regulasi Pasar (Rp/Ton)", value=150000)
     
     hasil = karbon_input * harga_input
-    st.metric("Potensi Pendapatan PES", f"Rp {hasil:,.0f}")
+    st.metric("Potensi Pendapatan Penerimaan Jasa Ekosistem (PES)", f"Rp {hasil:,.0f}")
     
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
@@ -396,7 +437,7 @@ elif menu == "PES":
         <h4 style="color: #5B21B6; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
             Simulasi menunjukkan potensi penerimaan keuangan daerah yang sangat masif sebesar <span style="color: #1D4ED8; font-weight: bold;">Rp {hasil:,.0f}</span> 
-            dari hasil optimalisasi insentif pasar dengan asumsi harga <span style="color: #B45309; font-weight: bold;">Rp {harga_input:,.0f}</span> per ton karbon. Skema PES merubah paradigma konservasi dari pusat pembiayaan pasif menjadi motor penggerak pendapatan daerah yang sangat menguntungkan. Dana kompensasi yang diperoleh dari penciptaan nilai karbon ini harus dialokasikan secara langsung untuk mendanai program pemberdayaan masyarakat adat di sekitar hutan. Pendekatan insentif ekonomi ini menciptakan harmoni antara target pertumbuhan ekonomi makro daerah dan upaya pelestarian kawasan hutan.
+            dari hasil optimalisasi insentif pasar internasional dengan asumsi harga patokan nilai sebesar <span style="color: #B45309; font-weight: bold;">Rp {harga_input:,.0f}</span> per ton karbon. Skema perdagangan karbon merubah paradigma pengelolaan lingkungan dari pusat beban pembiayaan pasif menjadi motor penggerak pendapatan asli daerah yang prospektif. Dana kompensasi non-ekstraktif ini wajib didistribusikan secara berkeadilan untuk mendanai program insentif pelestarian hutan rakyat oleh masyarakat lokal. Pendekatan insentif ekonomi ini menciptakan keselarasan jangka panjang antara target pertumbuhan ekonomi makro wilayah dan komitmen penurunan emisi gas rumah kaca global.
         </p>
     </div>
     """
