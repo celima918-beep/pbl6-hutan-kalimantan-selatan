@@ -13,14 +13,11 @@ st.set_page_config(
 )
 
 # =====================
-# INTERFACES FILE UPLOADER (DATA DINAMIS)
+# DATA UTAMA DEFAULT (BPS KALSEL)
 # =====================
 
-st.sidebar.header("PENGATURAN DATASET")
-uploaded_file = st.sidebar.file_uploader("Unggah File Data Kehutanan (Format .csv)", type=["csv"])
-
-# Fungsi internal untuk memuat data default jika user belum mengunggah file
-def load_default_data():
+@st.cache_data
+def load_data_kehutanan():
     data_kab = {
         "Kabupaten/Kota": [
             "Tanah Laut", "Kota Baru", "Banjar", "Barito Kuala", "Tapin", 
@@ -33,26 +30,17 @@ def load_default_data():
         "Hutan Produksi Tetap (ha)": [70157.61, 241902.40, 82503.74, 0.00, 5840.76, 11250.48, 8895.13, 16204.05, 90059.52, 134348.78, 24100.78, 0.00, 0.00],
         "Hutan Produksi Konversi (ha)": [8788.74, 26960.68, 2037.31, 876.66, 6738.37, 18587.09, 0.00, 25861.33, 3697.69, 25732.33, 0.00, 0.00, 0.00]
     }
-    return pd.DataFrame(data_kab)
+    df = pd.DataFrame(data_kab)
+    df["Total Kawasan Hutan (ha)"] = df.iloc[:, 1:6].sum(axis=1)
+    return df
 
-# Proses validasi input file uploader
-if uploaded_file is not None:
-    try:
-        df_hutan = pd.read_csv(uploaded_file)
-        st.sidebar.success("Dataset berhasil dimuat!")
-    except Exception as e:
-        st.sidebar.error(f"Gagal membaca file: {e}")
-        df_hutan = load_default_data()
-else:
-    df_hutan = load_default_data()
+df_hutan = load_data_kehutanan()
 
-# Kalkulasi parameter total wilayah berbasis data aktif
-df_hutan["Total Kawasan Hutan (ha)"] = df_hutan.iloc[:, 1:6].sum(axis=1)
-total_lindung = df_hutan.iloc[:, 1].sum()
-total_suaka = df_hutan.iloc[:, 2].sum()
-total_hpt = df_hutan.iloc[:, 3].sum()
-total_hp = df_hutan.iloc[:, 4].sum()
-total_hpk = df_hutan.iloc[:, 5].sum()
+total_lindung = df_hutan["Hutan Lindung (ha)"].sum()
+total_suaka = df_hutan["Suaka Alam & Pelestarian (ha)"].sum()
+total_hpt = df_hutan["Hutan Produksi Terbatas (ha)"].sum()
+total_hp = df_hutan["Hutan Produksi Tetap (ha)"].sum()
+total_hpk = df_hutan["Hutan Produksi Konversi (ha)"].sum()
 total_luas_provinsi = df_hutan["Total Kawasan Hutan (ha)"].sum()
 
 # =====================
@@ -107,7 +95,7 @@ if menu == "Beranda":
     
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Luas Hutan", f"{total_luas_provinsi:,.2f} ha")
-    col2.metric("Status Data", "Dinamis / Uploaded" if uploaded_file is not None else "Default BPS")
+    col2.metric("Hutan Lindung Terluas", "Kotabaru")
     col3.metric("Cadangan Karbon", "172 Juta Ton")
     col4.metric("Destinasi Wisata", "5 Lokasi Utama")
 
