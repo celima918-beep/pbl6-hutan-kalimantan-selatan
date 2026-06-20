@@ -116,13 +116,21 @@ if menu == "Beranda":
     st.write("Dashboard ini menyajikan data spasial dan valuasi ekonomi kehutanan Kalimantan Selatan.")
     st.dataframe(df_hutan.drop(columns=["Total Kawasan Hutan (ha)"]), use_container_width=True)
     
+    # Perhitungan Spasial untuk Analisis Dinamis
+    df_urut = df_hutan.sort_values(by="Total Kawasan Hutan (ha)", ascending=False)
+    kab_terluas = df_urut.iloc[0]["Kabupaten/Kota"]
+    luas_terluas = df_urut.iloc[0]["Total Kawasan Hutan (ha)"]
+    kab_terkecil = df_urut.iloc[-2]["Kabupaten/Kota"]
+    
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
-    st.markdown("""
-    **Deskripsi Menu:** Menu Beranda menyajikan gambaran umum mengenai profil fisik kawasan kehutanan di Kalimantan Selatan berdasarkan basis data Badan Pusat Statistik. Data mencakup agregasi total luas hutan dan sebaran spasial pada level kabupaten atau kota.
     
-    **Hasil Analisis Ekonomi Lingkungan:** Distribusi spasial kawasan hutan di Kalimantan Selatan menunjukkan ketimpangan geografis yang sangat tinggi. Kabupaten Kotabaru menguasai pangsa luas kawasan hutan terbesar, sedangkan wilayah perkotaan seperti Banjarmasin telah kehilangan seluruh tutupan lahannya. Ketimpangan ini menuntut adanya diferensiasi kebijakan tata ruang. Wilayah dengan persentase hutan yang tinggi harus difokuskan pada optimalisasi insentif jasa ekosistem. Sebaliknya, wilayah urban wajib didorong untuk menerapkan kebijakan kompensasi ruang terbuka hijau guna menyeimbangkan emisi karbon daerah.
-    """)
+    deskripsi_beranda = "Menu Beranda menyajikan gambaran umum mengenai profil fisik kawasan kehutanan di Kalimantan Selatan berdasarkan basis data Badan Pusat Statistik. Data mencakup agregasi total luas hutan dan sebaran spasial pada level kabupaten atau kota."
+    
+    analisis_beranda = f"Distribusi spasial kawasan hutan di Kalimantan Selatan menunjukkan ketimpangan geografis yang sangat tinggi. Kabupaten {kab_terluas} menguasai pangsa luas kawasan hutan terbesar sebesar {luas_terluas:,.2f} hektar. Sebaliknya wilayah perkotaan seperti {kab_terkecil} telah kehilangan hampir seluruh tutupan lahannya. Ketimpangan ini menuntut adanya diferensiasi kebijakan tata ruang. Wilayah dengan persentase hutan yang tinggi harus difokuskan pada optimalisasi insentif jasa ekosistem. Sebaliknya wilayah urban wajib didorong untuk menerapkan kebijakan kompensasi ruang terbuka hijau guna menyeimbangkan emisi karbon daerah."
+    
+    st.write(f"**Deskripsi Menu:** {deskripsi_beranda}")
+    st.write(f"**Hasil Analisis Ekonomi Lingkungan:** {analisis_beranda}")
 
 # =====================
 # FUNGSI HUTAN
@@ -145,13 +153,20 @@ elif menu == "Fungsi Hutan":
     st.plotly_chart(fig_fungsi, use_container_width=True)
     st.dataframe(df_fungsi_total, use_container_width=True)
     
+    # Perhitungan Proporsi Komersial vs Konservasi
+    total_produksi = total_hpt + total_hp + total_hpk
+    total_proteksi = total_lindung + total_suaka
+    rasio_produksi = (total_produksi / total_luas_provinsi) * 100
+    
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
-    st.markdown("""
-    **Deskripsi Menu:** Menu Fungsi Hutan memetakan proporsi pemanfaatan lahan berdasarkan regulasi status hukum kawasan. Data diklasifikasikan menjadi fungsi konservasi, proteksi lindung, serta fungsi produksi kayu komersial.
     
-    **Hasil Analisis Ekonomi Lingkungan:** Dominasi status Hutan Produksi Tetap dan Terbatas yang melebihi akumulasi luas Hutan Lindung mencerminkan bahwa orientasi pemanfaatan hutan di Kalimantan Selatan masih padat karya eksploitatif. Tingginya porsi hutan produksi memicu ancaman eksternalitas negatif berupa degradasi habitat dan penurunan fungsi hidrologis daerah aliran sungai. Pemerintah daerah perlu memperketat kuota tebang tahunan. Pembatasan ini krusial untuk mencegah percepatan konversi lahan ke sektor non-kehutanan yang berisiko menurunkan kapasitas asimilasi lingkungan dalam jangka panjang.
-    """)
+    deskripsi_fungsi = "Menu Fungsi Hutan memetakan proporsi pemanfaatan lahan berdasarkan regulasi status hukum kawasan. Data diklasifikasikan menjadi fungsi konservasi, proteksi lindung, serta fungsi produksi kayu komersial."
+    
+    analisis_fungsi = f"Dominasi status hutan produksi yang mencapai {rasio_produksi:.2f}% dari total kawasan mencerminkan bahwa orientasi pemanfaatan hutan di Kalimantan Selatan masih padat karya eksploitatif. Tingginya porsi hutan produksi memicu ancaman eksternalitas negatif berupa degradasi habitat dan penurunan fungsi hidrologis daerah aliran sungai. Pemerintah daerah perlu memperketat kuota tebang tahunan. Pembatasan ini krusial untuk mencegah percepatan konversi lahan ke sektor non-kehutanan yang berisiko menurunkan kapasitas asimilasi lingkungan dalam jangka panjang."
+    
+    st.write(f"**Deskripsi Menu:** {deskripsi_fungsi}")
+    st.write(f"**Hasil Analisis Ekonomi Lingkungan:** {analisis_fungsi}")
 
 # =====================
 # PROFIL SDA & JASA LINGKUNGAN
@@ -195,16 +210,21 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     })
     st.dataframe(data_wisata, use_container_width=True)
     
+    # Mengambil nilai cadangan dari dataframe
+    stok_karbon = data_karbon.iloc[0]["Volume (Ton)"]
+    
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
-    st.markdown("""
-    **Deskripsi Menu:** Menu ini mengidentifikasi aset intangibel ekosistem hutan yang meliputi tingkat kerapatan keanekaragaman hayati, volume riil stok simpanan karbon, serta sebaran titik objek wisata alam.
     
-    **Hasil Analisis Ekonomi Lingkungan:** Kekayaan biodiversitas dan volume cadangan karbon sebesar 172 juta ton membuktikan bahwa nilai ekologis hutan jauh melampaui nilai komoditas kayu domestik. Jasa lingkungan non-ekstraktif seperti objek wisata Tahura Sultan Adam dan Loksado merupakan penggerak ekonomi baru yang minim emisi. Pengembangan sektor ekowisata ini harus dikelola secara ketat menggunakan analisis batas ambang daya dukung lingkungan. Langkah tersebut diperlukan agar aktivitas rekreasi massal tidak merusak kelestarian ekosistem dan menurunkan kualitas keanekaragaman hayati lokal.
-    """)
+    deskripsi_sda = "Menu ini mengidentifikasi aset intangibel ekosistem hutan yang meliputi tingkat kerapatan keanekaragaman hayati, volume riil stok simpanan karbon, serta sebaran titik objek wisata alam."
+    
+    analisis_sda = f"Kekayaan biodiversitas dan volume cadangan karbon sebesar {stok_karbon:,.0f} ton membuktikan bahwa nilai ekologis hutan jauh melampaui nilai komoditas kayu domestik. Jasa lingkungan non-ekstraktif seperti objek wisata Tahura Sultan Adam dan Loksado merupakan penggerak ekonomi baru yang minim emisi. Pengembangan sektor ekowisata ini harus dikelola secara ketat menggunakan analisis batas ambang daya dukung lingkungan. Langkah tersebut diperlukan agar aktivitas rekreasi massal tidak merusak kelestarian ekosistem dan menurunkan kualitas keanekaragaman hayati lokal."
+    
+    st.write(f"**Deskripsi Menu:** {deskripsi_sda}")
+    st.write(f"**Hasil Analisis Ekonomi Lingkungan:** {analisis_sda}")
 
 # =====================
-# KALKULATOR TEV (SISTEM SLIDER DIGESER)
+# KALKULATOR TEV (DINAMIS)
 # =====================
 
 elif menu == "Kalkulator TEV":
@@ -252,39 +272,55 @@ elif menu == "Kalkulator TEV":
     )
     st.plotly_chart(fig_pie_tev, use_container_width=True)
     
+    # Perhitungan Kontribusi Terbesar Secara Dinamis
+    nilai_non_pasar = nilai_tidak_langsung + nilai_pilihan + nilai_eksistensi
+    persen_non_pasar = (nilai_non_pasar / total_tev) * 100
+    
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
-    st.markdown("""
-    **Deskripsi Menu:** Menu Kalkulator TEV menerapkan kerangka kerja ekonomi lingkungan untuk mengkuantifikasi nilai moneter total dari ekosistem hutan. Formulasi merangkum nilai guna langsung, nilai tidak langsung, nilai pilihan, dan nilai eksistensi non-pasar.
     
-    **Hasil Analisis Ekonomi Lingkungan:** Hasil simulasi membuktikan secara empiris bahwa nilai ekonomi total (TEV) didominasi oleh nilai guna tidak langsung dan nilai eksistensi. Temuan ini mematahkan argumen bahwa hutan hanya bernilai saat ditebang untuk diambil kayunya. Nilai intangibel dari fungsi hidrologis, stabilitas iklim, dan proteksi tanah memiliki magnitudo ekonomi yang jauh lebih masif bagi kesejahteraan masyarakat sekitar. Kegagalan dalam menginternalisasi nilai non-pasar ini ke dalam kebijakan pembangunan akan menyebabkan terjadinya eksploitasi lahan yang berlebihan akibat salah urus penilaian aset alam.
-    """)
+    deskripsi_tev = "Menu Kalkulator TEV menerapkan kerangka kerja ekonomi lingkungan untuk mengkuantifikasi nilai moneter total dari ekosistem hutan. Formulasi merangkum nilai guna langsung, nilai tidak langsung, nilai pilihan, dan nilai eksistensi non-pasar."
+    
+    analisis_tev = f"Hasil simulasi pada kawasan {pilihan_wilayah} membuktikan secara empiris bahwa nilai ekonomi total didominasi oleh fungsi non-pasar yaitu nilai guna tidak langsung, pilihan, dan eksistensi dengan akumulasi nilai Rp {nilai_non_pasar:,.2f} atau setara {persen_non_pasar:.2f}% dari total nilai ekonomi kawasan. Temuan ini mematahkan argumen bahwa hutan hanya bernilai saat ditebang untuk diambil kayunya yang saat ini dikalkulasi hanya berkontribusi sebesar Rp {nilai_langsung:,.2f}. Kegagalan dalam menginternalisasi nilai non-pasar ini ke dalam kebijakan pembangunan akan menyebabkan terjadinya eksploitasi lahan yang berlebihan akibat salah urus penilaian aset alam."
+    
+    st.write(f"**Deskripsi Menu:** {deskripsi_tev}")
+    st.write(f"**Hasil Analisis Ekonomi Lingkungan:** {analisis_tev}")
 
 # =====================
-# ANALISIS TRADE-OFF
+# ANALISIS TRADE-OFF (DINAMIS)
 # =====================
 
 elif menu == "Analisis Trade-Off":
     st.subheader("Simulasi Substitusi Lahan")
     
+    # Menggunakan slider untuk mengubah indeks kelayakan agar grafik interaktif
+    st.subheader("Sesuaikan Bobot Prioritas Kebijakan Jangka Panjang")
+    bobot_konservasi = st.slider("Fokus Terhadap Kompensasi Ekologis Jangka Panjang (%)", min_value=10, max_value=100, value=95, step=5)
+    
+    # Indeks skenario lain menyesuaikan secara deduktif terhadap pilihan pengguna
+    kelayakan_sawit = int(bobot_konservasi * 0.68)
+    kelayakan_kayu = int(bobot_konservasi * 0.42)
+    
     tradeoff = pd.DataFrame({
         "Skenario": ["Hutan Lestari", "Konversi Sawit", "Eksploitasi Kayu"],
-        "Nilai Kelayakan (%)": [95, 65, 40]
+        "Nilai Kelayakan (%)": [bobot_konservasi, kelayakan_sawit, kelayakan_kayu]
     })
 
-    fig = px.bar(tradeoff, x="Nilai Kelayakan (%)", y="Skenario", orientation="h", title="Perbandingan Nilai Kelayakan Antar Skenario")
+    fig = px.bar(tradeoff, x="Nilai Kelayakan (%)", y="Skenario", orientation="h", title="Perbandingan Nilai Kelayakan Antar Skenario", color="Skenario")
     st.plotly_chart(fig, use_container_width=True)
     
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
-    st.markdown("""
-    **Deskripsi Menu:** Menu Analisis Trade-Off mensimulasikan dampak pilihan kebijakan ekonomi terhadap keberlanjutan lingkungan. Modul ini membandingkan indeks kelayakan jangka panjang antara skenario konservasi penuh, konversi monokultur kelapa sawit, dan pembalakan kayu.
     
-    **Hasil Analisis Ekonomi Lingkungan:** Skenario konversi kelapa sawit dan eksploitasi kayu memberikan keuntungan finansial yang sangat cepat pada jangka pendek, namun mengorbankan indeks kelayakan jangka panjang secara drastis. Penurunan ini dipicu oleh tingginya biaya eksternalitas yang harus ditanggung masyarakat akibat bencana banjir dan hilangnya hilir sirkulasi air bersih. Skenario Hutan Lestari terbukti menghasilkan keberlanjutan ekonomi tertinggi karena menjaga stabilitas modal alam. Transformasi kebijakan dari eksploitasi menuju restorasi terencana merupakan keputusan rasional demi meminimalkan depresiasi kekayaan alam daerah.
-    """)
+    deskripsi_tradeoff = "Menu Analisis Trade-Off mensimulasikan dampak pilihan kebijakan ekonomi terhadap keberlanjutan lingkungan. Modul ini membandingkan indeks kelayakan jangka panjang antara skenario konservasi penuh, konversi monokultur kelapa sawit, dan pembalakan kayu."
+    
+    analisis_tradeoff = f"Saat target kelayakan jangka panjang dipatok pada angka {bobot_konservasi}%, skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan {kelayakan_sawit}% dan pembalakan kayu turun drastis ke angka {kelayakan_kayu}%. Penurunan kelayakan pada opsi ekstraktif dipicu oleh tingginya biaya eksternalitas yang harus ditanggung masyarakat akibat bencana banjir dan hilangnya hilir sirkulasi air bersih. Skenario Hutan Lestari terbukti menghasilkan keberlanjutan ekonomi tertinggi karena menjaga stabilitas modal alam. Transformasi kebijakan dari eksploitasi menuju restorasi terencana merupakan keputusan rasional demi meminimalkan depresiasi kekayaan alam daerah."
+    
+    st.write(f"**Deskripsi Menu:** {deskripsi_tradeoff}")
+    st.write(f"**Hasil Analisis Ekonomi Lingkungan:** {analisis_tradeoff}")
 
 # =====================
-# PES
+# PES (DINAMIS)
 # =====================
 
 elif menu == "PES":
@@ -298,8 +334,10 @@ elif menu == "PES":
     
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
-    st.markdown("""
-    **Deskripsi Menu:** Menu PES (Payment for Ecosystem Services) atau Imbal Jasa Lingkungan mensimulasikan instrumen pasar modern untuk konservasi. Sistem mengalkulasi potensi penerimaan dana segar yang diperoleh daerah melalui skema perdagangan karbon internasional.
     
-    **Hasil Analisis Ekonomi Lingkungan:** Simulasi menunjukkan potensi penerimaan keuangan daerah yang sangat masif dari hasil optimalisasi insentif pasar karbon. Skema PES merubah paradigma konservasi dari pusat pembiayaan pasif menjadi motor penggerak pendapatan daerah yang sangat menguntungkan. Dana kompensasi yang diperoleh dari penciptaan nilai karbon ini harus dialokasikan secara langsung untuk mendanai program pemberdayaan masyarakat adat di sekitar hutan. Pendekatan insentif ekonomi ini menciptakan harmoni antara target pertumbuhan ekonomi makro daerah dan upaya pelestarian kawasan hutan.
-    """)
+    deskripsi_pes = "Menu PES (Payment for Ecosystem Services) atau Imbal Jasa Lingkungan mensimulasikan instrumen pasar modern untuk konservasi. Sistem mengalkulasi potensi penerimaan dana segar yang diperoleh daerah melalui skema perdagangan karbon internasional."
+    
+    analisis_pes = f"Simulasi menunjukkan potensi penerimaan keuangan daerah yang sangat masif sebesar Rp {hasil:,.0f} dari hasil optimalisasi insentif pasar dengan asumsi harga Rp {harga_input:,.0f} per ton karbon. Skema PES merubah paradigma konservasi dari pusat pembiayaan pasif menjadi motor penggerak pendapatan daerah yang sangat menguntungkan. Dana kompensasi yang diperoleh dari penciptaan nilai karbon ini harus dialokasikan secara langsung untuk mendanai program pemberdayaan masyarakat adat di sekitar hutan. Pendekatan insentif ekonomi ini menciptakan harmoni antara target pertumbuhan ekonomi makro daerah dan upaya pelestarian kawasan hutan."
+    
+    st.write(f"**Deskripsi Menu:** {deskripsi_pes}")
+    st.write(f"**Hasil Analisis Ekonomi Lingkungan:** {analisis_pes}")
