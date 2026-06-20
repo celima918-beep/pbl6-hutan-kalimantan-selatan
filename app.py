@@ -231,7 +231,7 @@ elif menu == "Modul 2: Trade-off Analisis":
     
     st.write(f"Total Luas Kawasan Hutan di {pilihan_wilayah_trade}: {luas_maksimal:,.2f} Hektar")
     
-    luas_konversi = st.slider("Asumsi Luas Kawasan Hutan yang Dikonversi (Hektar)", 0.0, float(luas_maksimal), float(luas_maksimal * 0.1 if tragic_max := luas_maksimal * 0.1 else 0.0))
+    luas_konversi = st.slider("Asumsi Luas Kawasan Hutan yang Dikonversi (Hektar)", 0.0, float(luas_maksimal), float(luas_maksimal * 0.1 if luas_maksimal * 0.1 > 0 else 0.0))
     
     untung_sawit_per_ha = st.number_input("Rata-rata Keuntungan Sektor Perkebunan Komersial (Rp/Hektar/Tahun)", value=15000000)
     total_untung_konversi = luas_konversi * untung_sawit_per_ha
