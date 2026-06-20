@@ -44,7 +44,7 @@ total_hpk = df_hutan["Hutan Produksi Konversi (ha)"].sum()
 total_luas_provinsi = df_hutan["Total Kawasan Hutan (ha)"].sum()
 
 # =====================
-# LOGO, JUDUL UTAMA BERWARNA & ATRIBUSI AKADEMIK
+# LOGO, JUDUL UTAMA & ATRIBUSI AKADEMIK
 # =====================
 
 try:
@@ -52,21 +52,6 @@ try:
     has_logo = True
 except:
     has_logo = False
-
-# Pembungkusan komponen judul utama ke dalam struktur visual banner berwarna
-st.markdown(
-    """
-    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #047857 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h1 style="color: #ffffff; margin: 0; font-size: 2.5rem; text-align: center; font-weight: 800; letter-spacing: 1px;">
-            ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN
-        </h1>
-        <p style="color: #e0f2fe; margin: 10px 0 0 0; text-align: center; font-size: 1.2rem; font-weight: 400;">
-            Project Based Learning Ekonomi Sumber Daya Alam dan Lingkungan
-        </p>
-    </div>
-    """, 
-    unsafe_allow_html=True
-)
 
 col_header1, col_header2 = st.columns([1, 5])
 
@@ -77,6 +62,9 @@ with col_header1:
         st.warning("Logo tidak ditemukan")
 
 with col_header2:
+    st.title("ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN")
+    st.write("Project Based Learning Ekonomi Sumber Daya Alam dan Lingkungan")
+    
     st.markdown("<div><span style='color: #374151; font-weight: bold;'>Dosen Pengampu:</span> <span style='color: #DC2626; font-weight: bold;'>Yuhka Sundaya</span></div>", unsafe_allow_html=True)
     st.markdown("<div style='margin-top: 15px; margin-bottom: 5px;'><span style='color: #1E3A8A; font-weight: bold; font-size: 15px;'>ANGGOTA KELOMPOK 9:</span></div>", unsafe_allow_html=True)
     
@@ -134,6 +122,9 @@ if menu == "Beranda":
     kab_terkecil = df_urut.iloc[-2]["Kabupaten/Kota"]
     
     st.divider()
+    st.subheader("Deskripsi dan Tinjauan Analisis")
+    
+    deskripsi_beranda = "Menu Beranda menyajikan gambaran umum mengenai profil fisik kawasan kehutanan di Kalimantan Selatan berdasarkan basis data Badan Pusat Statistik. Data mencakup agregasi total luas hutan dan sebaran spasial pada level kabupaten atau kota."
     
     analisis_beranda = f"""
     <div style="background-color: #F0FDF4; padding: 20px; border-left: 6px solid #16A34A; border-radius: 4px;">
@@ -146,6 +137,9 @@ if menu == "Beranda":
         </p>
     </div>
     """
+    
+    with st.container(border=True):
+        st.write(f"**Deskripsi Menu:** {deskripsi_beranda}")
     st.markdown(analisis_beranda, unsafe_allow_html=True)
 
 # =====================
@@ -175,6 +169,9 @@ elif menu == "Fungsi Hutan":
     rasio_produksi = (total_produksi / total_luas_provinsi) * 100
     
     st.divider()
+    st.subheader("Deskripsi dan Tinjauan Analisis")
+    
+    deskripsi_fungsi = "Menu Fungsi Hutan memetakan proporsi pemanfaatan lahan berdasarkan regulasi status hukum kawasan. Data diklasifikasikan menjadi fungsi konservasi, proteksi lindung, serta fungsi produksi kayu komersial."
     
     analisis_fungsi = f"""
     <div style="background-color: #FEF2F2; padding: 20px; border-left: 6px solid #DC2626; border-radius: 4px;">
@@ -185,6 +182,9 @@ elif menu == "Fungsi Hutan":
         </p>
     </div>
     """
+    
+    with st.container(border=True):
+        st.write(f"**Deskripsi Menu:** {deskripsi_fungsi}")
     st.markdown(analisis_fungsi, unsafe_allow_html=True)
 
 # =====================
@@ -232,6 +232,9 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     stok_karbon = data_karbon.iloc[0]["Volume (Ton)"]
     
     st.divider()
+    st.subheader("Deskripsi dan Tinjauan Analisis")
+    
+    deskripsi_sda = "Menu ini mengidentifikasi aset intangibel ekosistem hutan yang meliputi tingkat kerapatan keanekaragaman hayati, volume riil stok simpanan karbon, serta sebaran titik objek wisata alam."
     
     analisis_sda = f"""
     <div style="background-color: #F0FDF4; padding: 20px; border-left: 6px solid #16A34A; border-radius: 4px;">
@@ -242,6 +245,9 @@ elif menu == "Profil SDA & Jasa Lingkungan":
         </p>
     </div>
     """
+    
+    with st.container(border=True):
+        st.write(f"**Deskripsi Menu:** {deskripsi_sda}")
     st.markdown(analisis_sda, unsafe_allow_html=True)
 
 # =====================
@@ -298,6 +304,9 @@ elif menu == "Kalkulator TEV":
     persen_non_pasar = (nilai_non_pasar / total_tev) * 100
     
     st.divider()
+    st.subheader("Deskripsi dan Tinjauan Analisis")
+    
+    deskripsi_tev = "Menu Kalkulator TEV menerapkan kerangka kerja ekonomi lingkungan untuk mengkuantifikasi nilai moneter total dari ekosistem hutan. Formulasi merangkum nilai guna langsung, nilai tidak langsung, nilai pilihan, dan nilai eksistensi non-pasar."
     
     analisis_tev = f"""
     <div style="background-color: #EFF6FF; padding: 20px; border-left: 6px solid #2563EB; border-radius: 4px;">
@@ -310,6 +319,9 @@ elif menu == "Kalkulator TEV":
         </p>
     </div>
     """
+    
+    with st.container(border=True):
+        st.write(f"**Deskripsi Menu:** {deskripsi_tev}")
     st.markdown(analisis_tev, unsafe_allow_html=True)
 
 # =====================
@@ -342,6 +354,9 @@ elif menu == "Analisis Trade-Off":
     st.plotly_chart(fig, use_container_width=True)
     
     st.divider()
+    st.subheader("Deskripsi dan Tinjauan Analisis")
+    
+    deskripsi_tradeoff = "Menu Analisis Trade-Off mensimulasikan dampak pilihan kebijakan ekonomi terhadap keberlanjutan lingkungan. Modul ini membandingkan indeks kelayakan jangka panjang antara skenario konservasi penuh, konversi monokultur kelapa sawit, dan pembalakan kayu."
     
     analisis_tradeoff = f"""
     <div style="background-color: #FFFBEB; padding: 20px; border-left: 6px solid #D97706; border-radius: 4px;">
@@ -349,10 +364,13 @@ elif menu == "Analisis Trade-Off":
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
             Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, 
             skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> 
-            dan pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Penurunan kelayakan pada opsi extractive dipicu oleh tingginya biaya eksternalitas yang harus ditanggung masyarakat akibat bencana banjir dan hilangnya hilir sirkulasi air bersih. Skenario Hutan Lestari terbukti menghasilkan keberlanjutan ekonomi tertinggi karena menjaga stabilitas modal alam. Transformasi kebijakan dari eksploitasi menuju restorasi terencana merupakan keputusan rasional demi meminimalkan depresiasi kekayaan alam daerah.
+            dan pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Penurunan kelayakan pada opsi ekstraktif dipicu oleh tingginya biaya eksternalitas yang harus ditanggung masyarakat akibat bencana banjir dan hilangnya hilir sirkulasi air bersih. Skenario Hutan Lestari terbukti menghasilkan keberlanjutan ekonomi tertinggi karena menjaga stabilitas modal alam. Transformasi kebijakan dari eksploitasi menuju restorasi terencana merupakan keputusan rasional demi meminimalkan depresiasi kekayaan alam daerah.
         </p>
     </div>
     """
+    
+    with st.container(border=True):
+        st.write(f"**Deskripsi Menu:** {deskripsi_tradeoff}")
     st.markdown(analisis_tradeoff, unsafe_allow_html=True)
 
 # =====================
@@ -369,6 +387,9 @@ elif menu == "PES":
     st.metric("Potensi Pendapatan PES", f"Rp {hasil:,.0f}")
     
     st.divider()
+    st.subheader("Deskripsi dan Tinjauan Analisis")
+    
+    deskripsi_pes = "Menu PES (Payment for Ecosystem Services) atau Imbal Jasa Lingkungan mensimulasikan instrumen pasar modern untuk konservasi. Sistem mengalkulasi potensi penerimaan dana segar yang diperoleh daerah melalui skema perdagangan karbon internasional."
     
     analisis_pes = f"""
     <div style="background-color: #FAF5FF; padding: 20px; border-left: 6px solid #7C3AED; border-radius: 4px;">
@@ -379,4 +400,7 @@ elif menu == "PES":
         </p>
     </div>
     """
+    
+    with st.container(border=True):
+        st.write(f"**Deskripsi Menu:** {deskripsi_pes}")
     st.markdown(analisis_pes, unsafe_allow_html=True)
