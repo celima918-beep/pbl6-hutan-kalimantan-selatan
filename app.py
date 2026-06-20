@@ -65,19 +65,24 @@ with col_header2:
     st.title("ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN")
     st.write("Project Based Learning Ekonomi Sumber Daya Alam dan Lingkungan")
     
-    # Penambahan Judul Kelompok dan Pemberian Warna Berbasis Markdown HTML
-    st.markdown("<span style='color: #1E3A8A; font-weight: bold; font-size: 16px;'>ANGGOTA KELOMPOK 9 :</span>", unsafe_allow_html=True)
+    # Penempatan Data Dosen Pengampu Tepat di Bawah Judul Utama
+    st.markdown("<div><span style='color: #374151; font-weight: bold;'>Dosen Pengampu:</span> <span style='color: #DC2626; font-weight: bold;'>Yuhka Sundaya</span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 15px; margin-bottom: 5px;'><span style='color: #1E3A8A; font-weight: bold; font-size: 15px;'>ANGGOTA KELOMPOK 9:</span></div>", unsafe_allow_html=True)
     
+    # Penempatan Kotak Identitas Anggota Menggunakan st.container dan borders
     col_k1, col_k2, col_k3 = st.columns(3)
-    with col_k1:
-        st.markdown("<span style='color: #047857; font-weight: 500;'>1. Ina Rani Amelia</span> <span style='color: #6B7280;'>(NPM: 10090224002)</span>", unsafe_allow_html=True)
-    with col_k2:
-        st.markdown("<span style='color: #B45309; font-weight: 500;'>2. Nayla Dwi Safitri</span> <span style='color: #6B7280;'>(NPM: 10090224013)</span>", unsafe_allow_html=True)
-    with col_k3:
-        st.markdown("<span style='color: #4338CA; font-weight: 500;'>3. Celi Maulidi Aprilia</span> <span style='color: #6B7280;'>(NPM: 10090224027)</span>", unsafe_allow_html=True)
     
-    # Penambahan Data Dosen Pengampu
-    st.markdown("<div style='margin-top: 5px;'><span style='color: #374151; font-weight: bold;'>Dosen Pengampu :</span> <span style='color: #DC2626; font-weight: bold;'>Yuhka Sundaya</span></div>", unsafe_allow_html=True)
+    with col_k1:
+        with st.container(border=True):
+            st.markdown("<span style='color: #047857; font-weight: bold;'>Ina Rani Amelia</span><br><span style='color: #6B7280; font-size: 13px;'>NPM: 10090224002</span>", unsafe_allow_html=True)
+            
+    with col_k2:
+        with st.container(border=True):
+            st.markdown("<span style='color: #B45309; font-weight: bold;'>Nayla Dwi Safitri</span><br><span style='color: #6B7280; font-size: 13px;'>NPM: 10090224013</span>", unsafe_allow_html=True)
+            
+    with col_k3:
+        with st.container(border=True):
+            st.markdown("<span style='color: #4338CA; font-weight: bold;'>Celi Maulidi Aprilia</span><br><span style='color: #6B7280; font-size: 13px;'>NPM: 10090224027</span>", unsafe_allow_html=True)
 
 st.divider()
 
@@ -186,36 +191,40 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.dataframe(data_wisata, use_container_width=True)
 
 # =====================
-# KALKULATOR TEV
+# KALKULATOR TEV (SISTEM SLIDER DIGESER)
 # =====================
 
 elif menu == "Kalkulator TEV":
     st.header("Kalkulator Total Economic Value (TEV)")
-    st.write("Simulasi valuasi nilai ekonomi total ekosistem hutan berdasarkan pendekatan fungsi manfaat spasial daerah.")
+    st.write("Simulasi valuasi nilai ekonomi total ekosistem hutan menggunakan slider interaktif untuk mengatur asumsi nilai per hektar.")
     
     pilihan_wilayah = st.selectbox("Pilih Wilayah Analisis Simulasi:", ["Total Provinsi"] + list(df_hutan["Kabupaten/Kota"]))
     
     if pilihan_wilayah == "Total Provinsi":
         luas_analisis = total_luas_provinsi
-        asumsi_langsung = 6991011291
-        asumsi_tidak_langsung = 2497046942
     else:
         row_kab = df_hutan[df_hutan["Kabupaten/Kota"] == pilihan_wilayah].iloc[0]
         luas_analisis = row_kab["Total Kawasan Hutan (ha)"]
-        proporsi = luas_analisis / total_luas_provinsi
-        asumsi_langsung = int(6991011291 * proporsi)
-        asumsi_tidak_langsung = int(2497046942 * proporsi)
         
     st.info(f"Luas Geografis Hutan Teranalisis: {luas_analisis:,.2f} Hektar")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        nilai_langsung = st.number_input("1. Nilai Guna Langsung (Manfaat Hasil Kayu Finansial) - Rp/Tahun", value=asumsi_langsung)
-        nilai_tidak_langsung = st.number_input("2. Nilai Guna Tidak Langsung (Fungsi Serapan Karbon & Oksigen) - Rp/Tahun", value=asumsi_tidak_langsung)
-    with col2:
-        nilai_pilihan = st.number_input("3. Nilai Pilihan (Option Value Keanekaragaman Hayati Objek Wisata) - Rp/Tahun", value=int(luas_analisis * 15000))
-        nilai_eksistensi = st.number_input("4. Nilai Eksistensi (Existence Value Warisan Ekosistem) - Rp/Tahun", value=int(luas_analisis * 10000))
+    # Implementasi Sistem Geser (Slider) untuk Simulasi Komponen Per Hektar
+    st.subheader("Geser untuk Mengatur Asumsi Nilai Manfaat Ekosistem (Rp / Hektar / Tahun)")
+    
+    col_sl1, col_sl2 = st.columns(2)
+    with col_sl1:
+        tarif_langsung = st.slider("Asumsi Nilai Guna Langsung (Hasil Kayu Finansial)", min_value=1000, max_value=50000, value=15000, step=500)
+        tarif_tidak_langsung = st.slider("Asumsi Nilai Guna Tidak Langsung (Fungsi Karbon & Oksigen)", min_value=1000, max_value=50000, value=20000, step=500)
+    with col_sl2:
+        tarif_pilihan = st.slider("Asumsi Nilai Pilihan (Keanekaragaman Hayati & Wisata)", min_value=1000, max_value=50000, value=15000, step=500)
+        tarif_eksistensi = st.slider("Asumsi Nilai Eksistensi (Warisan Kelestarian Hutan)", min_value=1000, max_value=50000, value=10000, step=500)
         
+    # Kalkulasi Otomatis Berbasis Luas Wilayah dan Nilai Sistem Geser
+    nilai_langsung = int(luas_analisis * tarif_langsung)
+    nilai_tidak_langsung = int(luas_analisis * tarif_tidak_langsung)
+    nilai_pilihan = int(luas_analisis * tarif_pilihan)
+    nilai_eksistensi = int(luas_analisis * tarif_eksistensi)
+    
     total_tev = nilai_langsung + nilai_tidak_langsung + nilai_pilihan + nilai_eksistensi
     st.metric(label=f"ESTIMASI TOTAL ECONOMIC VALUE (TEV) - {pilihan_wilayah.upper()}", value=f"Rp {total_tev:,.2f}")
     
