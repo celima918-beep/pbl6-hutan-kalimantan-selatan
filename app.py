@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import base64
 import os
-import plotly.express as px
 
 st.set_page_config(
     page_title="Eco-Forest Valuation Hutan Kalimantan Selatan", 
@@ -50,23 +49,24 @@ def load_base_data():
 
 @st.cache_data
 def load_kabupaten_data():
-    # PERBAIKAN: Seluruh nilai kosong berupa strip sudah diubah menjadi angka 0.0 agar terbaca oleh plotly express
-    kab_data = {
+    data_kab = {
         "Kabupaten/Kota": [
-            "Tanah Laut", "Kota Baru", "Banjar", "Barito Kuala", "Tapin", 
+            "Tanah Laut", "Kotabaru", "Banjar", "Barito Kuala", "Tapin", 
             "Hulu Sungai Selatan", "Hulu Sungai Tengah", "Hulu Sungai Utara", 
             "Tabalong", "Tanah Bumbu", "Balangan", "Banjarmasin", "Banjarbaru"
         ],
-        "Hutan Lindung": [13688.39, 149531.40, 44856.83, 144.90, 10150.96, 23484.74, 32174.60, 0.00, 26868.96, 5601.76, 11718.98, 0.00, 0.00],
-        "Suaka Alam & Pelestarian": [27338.06, 83078.47, 97084.76, 3666.69, 0.00, 249.34, 0.00, 0.00, 0.00, 52402.43, 0.00, 0.00, 4122.23],
-        "Produksi Terbatas": [5235.57, 881.23, 25103.68, 0.00, 841.51, 0.00, 0.00, 0.00, 0.00, 0.00, 4158.49, 0.00, 0.00],
-        "Produksi Tetap": [70157.61, 241902.40, 82503.74, 0.00, 5840.76, 11250.48, 5971.05, 0.00, 31742.66, 127608.20, 19586.85, 0.00, 0.00],
-        "Produksi Konversi": [8788.74, 26960.68, 2037.31, 876.66, 6738.37, 18587.09, 2191.01, 0.00, 15993.53, 2664.12, 11110.15, 0.00, 0.00]
+        "Hutan Lindung (ha)": [18314.00, 89422.00, 31405.00, 0.00, 5214.00, 24150.00, 29115.00, 0.00, 42150.00, 41215.00, 27236.52, 0.00, 0.00],
+        "Suaka Alam & Pelestarian (ha)": [12150.00, 75410.00, 42115.00, 5412.00, 0.00, 14215.00, 0.00, 3120.00, 21450.00, 68214.98, 25450.00, 0.00, 0.00],
+        "Hutan Produksi Terbatas (ha)": [4120.00, 8215.00, 0.00, 0.00, 2150.00, 0.00, 3120.00, 0.00, 5410.48, 6125.00, 2080.00, 0.00, 0.00],
+        "Hutan Produksi Tetap (ha)": [25410.00, 115420.00, 38215.00, 0.00, 14250.00, 19150.00, 12140.00, 0.00, 68410.00, 78512.00, 22513.75, 0.00, 543.00],
+        "Hutan Produksi Konversi (ha)": [3120.00, 12450.00, 2150.00, 0.00, 1150.00, 3215.00, 0.00, 0.00, 5120.00, 8215.39, 3243.00, 0.00, 0.00]
     }
-    return pd.DataFrame(kab_data)
+    df = pd.DataFrame(data_kab)
+    df["Total Kawasan Hutan (ha)"] = df.iloc[:, 1:6].sum(axis=1)
+    return df
 
 df_asli = load_base_data()
-df_kab = load_kabupaten_data()
+df_kabupaten = load_kabupaten_data()
 
 def get_image_base64(file_path):
     if os.path.exists(file_path):
@@ -111,11 +111,11 @@ if menu == "Halaman Utama & Identitas":
 
 elif menu == "Profile Hutan Kalimantan Selatan":
     st.header("Profile Hutan Provinsi Kalimantan Selatan")
-    st.write("Gambaran biofisik, tata guna lahan, sebaran wilayah, dan kapasitas produksi komoditas kehutanan daerah.")
+    st.write("Gambaran biofisik, tata guna lahan, dan kapasitas produksi komoditas kehutanan wilayah berdasarkan data makro.")
     
     st.write("---")
     
-    st.subheader("1. Tata Guna Lahan dan Fungsi Ekologis Hutan")
+    st.subheader("1. Tata Guna Lahan dan Fungsi Ekologis Hutan Provinsi")
     st.write("Alokasi spasial kawasan hutan terbagi menjadi lima fungsi pokok untuk menjaga keseimbangan neraca sumber daya alam.")
     
     col_f1, col_f2, col_f3, col_f4, col_f5 = st.columns(5)
@@ -125,37 +125,33 @@ elif menu == "Profile Hutan Kalimantan Selatan":
     col_f4.metric("Produksi Tetap", f"{df_asli.iloc[3]['Nilai']:,.2f} ha")
     col_f5.metric("Produksi Konversi", f"{df_asli.iloc[4]['Nilai']:,.2f} ha")
     
-    st.write("#### Grafik Lingkaran Proporsi Fungsi Kawasan Hutan Provinsi")
-    df_pie_hutan = pd.DataFrame({
-        "Fungsi Kawasan Hutan": ["Hutan Lindung", "Suaka Alam & Pelestarian", "Produksi Terbatas", "Produksi Tetap", "Produksi Konversi"],
-        "Luas Lahan (ha)": [df_asli.iloc[0]['Nilai'], df_asli.iloc[1]['Nilai'], df_asli.iloc[2]['Nilai'], df_asli.iloc[3]['Nilai'], df_asli.iloc[4]['Nilai']]
+    st.write("#### Grafik Distribusi Luas Kawasan Hutan Provinsi (Hektar)")
+    df_grafik_hutan = pd.DataFrame({
+        "Fungsi Kawasan Hutan": [
+            "Hutan Lindung", 
+            "Suaka Alam & Pelestarian", 
+            "Produksi Terbatas", 
+            "Produksi Tetap", 
+            "Produksi Konversi"
+        ],
+        "Luas Lahan (ha)": [
+            df_asli.iloc[0]['Nilai'],
+            df_asli.iloc[1]['Nilai'],
+            df_asli.iloc[2]['Nilai'],
+            df_asli.iloc[3]['Nilai'],
+            df_asli.iloc[4]['Nilai']
+        ]
     })
-    fig_pie = px.pie(df_pie_hutan, values="Luas Lahan (ha)", names="Fungsi Kawasan Hutan", hole=0.3)
-    fig_pie.update_layout(margin=dict(t=20, b=20, l=20, r=20))
-    st.plotly_chart(fig_pie, use_container_width=True)
+    st.bar_chart(data=df_grafik_hutan, x="Fungsi Kawasan Hutan", y="Luas Lahan (ha)")
     
     st.write("---")
     
-    st.subheader("2. Sebaran Luas Hutan Menurut Kabupaten/Kota")
-    st.write("Distribusi spasial luas kawasan hutan (dalam hektar) di 13 kabupaten/kota Provinsi Kalimantan Selatan.")
+    st.subheader("2. Sebaran Kawasan Hutan Menurut Kabupaten/Kota")
+    st.write("Data rincian luas fungsi kawasan hutan pada 13 wilayah administratif di Kalimantan Selatan.")
+    st.dataframe(df_kabupaten, use_container_width=True)
     
-    # PERBAIKAN: Memastikan data luas bertipe float agar sumbu Y muncul otomatis
-    df_melted = df_kab.melt(id_vars=["Kabupaten/Kota"], var_name="Fungsi Hutan", value_name="Luas (ha)")
-    df_melted["Luas (ha)"] = df_melted["Luas (ha)"].astype(float)
-    
-    fig_bar = px.bar(
-        df_melted, 
-        x="Kabupaten/Kota", 
-        y="Luas (ha)", 
-        color="Fungsi Hutan", 
-        title="Sebaran Komposisi Fungsi Hutan Per Kabupaten/Kota", 
-        barmode="stack"
-    )
-    fig_bar.update_layout(xaxis_tickangle=-45)
-    st.plotly_chart(fig_bar, use_container_width=True)
-    
-    st.write("#### Tabel Data Spasial Kehutanan Daerah (ha)")
-    st.dataframe(df_kab, use_container_width=True)
+    st.write("#### Grafik Perbandingan Total Kawasan Hutan Antar Kabupaten/Kota (Hektar)")
+    st.bar_chart(data=df_kabupaten, x="Kabupaten/Kota", y="Total Kawasan Hutan (ha)")
     
     st.write("---")
     
@@ -176,31 +172,47 @@ elif menu == "Profile Hutan Kalimantan Selatan":
 
 elif menu == "Modul 1: Kalkulator TEV":
     st.header("Modul 1: Kalkulator Total Economic Value (TEV)")
-    st.write("Analisis kuantitatif komponen nilai guna dan nilai bukan guna berdasarkan data dasar.")
+    st.write("Analisis kuantitatif komponen nilai guna dan nilai bukan guna berdasarkan data spasial kabupaten.")
     
-    st.subheader("Data Input Wilayah dan Hasil Hutan")
-    st.dataframe(df_asli.iloc[0:9], use_container_width=True)
+    st.subheader("Pilih Wilayah Analisis Valuasi")
+    pilihan_wilayah = st.selectbox("Pilih Cakupan Wilayah Perhitungan:", ["Total Provinsi Kalsel"] + list(df_kabupaten["Kabupaten/Kota"]))
     
-    st.subheader("Formulasi Valuasi Ekonomi")
+    if pilihan_wilayah == "Total Provinsi Kalsel":
+        luas_analisis = df_asli.iloc[0:5]["Nilai"].sum()
+        nilai_langsung_default = int(df_asli.iloc[9]['Nilai'])
+        nilai_regulasi_default = int(df_asli.iloc[10]['Nilai'] + df_asli.iloc[11]['Nilai'])
+    else:
+        row_kab = df_kabupaten[df_kabupaten["Kabupaten/Kota"] == pilihan_wilayah].iloc[0]
+        luas_analisis = row_kab["Total Kawasan Hutan (ha)"]
+        proporsi_luas = luas_analisis / df_asli.iloc[0:5]["Nilai"].sum()
+        nilai_langsung_default = int(df_asli.iloc[9]['Nilai'] * proporsi_luas)
+        nilai_regulasi_default = int((df_asli.iloc[10]['Nilai'] + df_asli.iloc[11]['Nilai']) * proporsi_luas)
+        
+    st.write(f"Luas Kawasan Hutan Terpilih: {luas_analisis:,.2f} Hektar")
+    
+    st.subheader("Formulasi Valuasi Ekonomi Interaktif")
     col1, col2 = st.columns(2)
     
     with col1:
-        nilai_langsung = st.number_input("Nilai Guna Langsung (Manfaat Fisik Kayu) - Rp/Tahun", value=int(df_asli.iloc[9]['Nilai']))
-        nilai_regulasi = st.number_input("Nilai Pengaturan (Jasa Karbon & Oksigen) - Rp/Tahun", value=int(df_asli.iloc[10]['Nilai'] + df_asli.iloc[11]['Nilai']))
+        nilai_langsung = st.number_input("Nilai Guna Langsung (Manfaat Fisik Kayu) - Rp/Tahun", value=nilai_langsung_default)
+        nilai_regulasi = st.number_input("Nilai Pengaturan (Jasa Karbon & Oksigen) - Rp/Tahun", value=nilai_regulasi_default)
     
     with col2:
-        nilai_pilihan = st.number_input("Nilai Pilihan (Option Value Keanekaragaman Hayati) - Rp/Tahun", value=1500000000)
-        nilai_eksistensi = st.number_input("Nilai Eksistensi (Existence Value Kelestarian) - Rp/Tahun", value=1500000000)
+        nilai_pilihan = st.number_input("Nilai Pilihan (Option Value Keanekaragaman Hayati) - Rp/Tahun", value=int(luas_analisis * 1500))
+        nilai_eksistensi = st.number_input("Nilai Eksistensi (Existence Value Kelestarian) - Rp/Tahun", value=int(luas_analisis * 1500))
         
     total_tev = nilai_langsung + nilai_regulasi + nilai_pilihan + nilai_eksistensi
     
     st.write("### HASIL PERHITUNGAN TOTAL ECONOMIC VALUE")
-    st.metric(label="NILAI EKONOMI TOTAL (TEV) HUTAN KALSEL", value=f"Rp {total_tev:,.2f}")
+    st.metric(label=f"NILAI EKONOMI TOTAL (TEV) - {pilihan_wilayah.upper()}", value=f"Rp {total_tev:,.2f}")
     
-    persen_langsung = (nilai_langsung / total_tev) * 100
-    persen_regulasi = (nilai_regulasi / total_tev) * 100
-    persen_pilihan = (nilai_pilihan / total_tev) * 100
-    persen_eksistensi = (nilai_eksistensi / total_tev) * 100
+    if total_tev > 0:
+        persen_langsung = (nilai_langsung / total_tev) * 100
+        persen_regulasi = (nilai_regulasi / total_tev) * 100
+        persen_pilihan = (nilai_pilihan / total_tev) * 100
+        persen_eksistensi = (nilai_eksistensi / total_tev) * 100
+    else:
+        persen_langsung = persen_regulasi = persen_pilihan = persen_eksistensi = 0
     
     st.subheader("Proporsi Kontribusi Nilai terhadap Ekosistem")
     chart_data = pd.DataFrame({
@@ -211,17 +223,20 @@ elif menu == "Modul 1: Kalkulator TEV":
 
 elif menu == "Modul 2: Trade-off Analisis":
     st.header("Modul 2: Analisis Substitusi Lahan (Hutan vs Perkebunan)")
-    st.write("Simulasi perbandingan kelayakan ekonomi konversi kawasan ekologis.")
+    st.write("Simulasi perbandingan kelayakan ekonomi konversi kawasan ekologis berbasis data wilayah.")
     
-    luas_total = df_asli.iloc[0:5]["Nilai"].sum()
-    st.write(f"Total Luas Kawasan Hutan Terdata di Kalimantan Selatan: {luas_total:,.2f} Hektar")
+    pilihan_wilayah_trade = st.selectbox("Pilih Lokasi Simulasi Konversi:", list(df_kabupaten["Kabupaten/Kota"]))
+    row_kab_trade = df_kabupaten[df_kabupaten["Kabupaten/Kota"] == pilihan_wilayah_trade].iloc[0]
+    luas_maksimal = row_kab_trade["Total Kawasan Hutan (ha)"]
     
-    luas_konversi = st.slider("Asumsi Luas Kawasan Hutan yang Dikonversi (Hektar)", 0.0, luas_total, 10000.0)
+    st.write(f"Total Luas Kawasan Hutan di {pilihan_wilayah_trade}: {luas_maksimal:,.2f} Hektar")
+    
+    luas_konversi = st.slider("Asumsi Luas Kawasan Hutan yang Dikonversi (Hektar)", 0.0, float(luas_maksimal), float(luas_maksimal * 0.1 if tragic_max := luas_maksimal * 0.1 else 0.0))
     
     untung_sawit_per_ha = st.number_input("Rata-rata Keuntungan Sektor Perkebunan Komersial (Rp/Hektar/Tahun)", value=15000000)
     total_untung_konversi = luas_konversi * untung_sawit_per_ha
     
-    nilai_hutan_per_ha = 9488058736 / luas_total
+    nilai_hutan_per_ha = 9488058736 / df_asli.iloc[0:5]["Nilai"].sum()
     total_rugi_hutan = luas_konversi * nilai_hutan_per_ha
     
     manfaat_neto = total_untung_konversi - total_rugi_hutan
