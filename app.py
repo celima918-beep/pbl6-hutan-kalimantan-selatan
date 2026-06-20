@@ -36,7 +36,6 @@ def load_data_kehutanan():
 
 df_hutan = load_data_kehutanan()
 
-# Total Luas Hutan Provinsi
 total_lindung = df_hutan["Hutan Lindung (ha)"].sum()
 total_suaka = df_hutan["Suaka Alam & Pelestarian (ha)"].sum()
 total_hpt = df_hutan["Hutan Produksi Terbatas (ha)"].sum()
@@ -79,10 +78,8 @@ menu = st.sidebar.radio(
     "Pilih Menu",
     [
         "Beranda",
-        "Biodiversitas",
         "Fungsi Hutan",
-        "Karbon",
-        "Wisata Alam",
+        "Profil SDA & Jasa Lingkungan",
         "Kalkulator TEV",
         "Analisis Trade-Off",
         "PES"
@@ -106,22 +103,6 @@ if menu == "Beranda":
     st.dataframe(df_hutan.drop(columns=["Total Kawasan Hutan (ha)"]), use_container_width=True)
 
 # =====================
-# BIODIVERSITAS
-# =====================
-
-elif menu == "Biodiversitas":
-    st.subheader("Keanekaragaman Hayati")
-    
-    data = pd.DataFrame({
-        "Kategori": ["Flora", "Fauna"],
-        "Jumlah": [3000, 500]
-    })
-
-    st.dataframe(data)
-    fig = px.bar(data, x="Kategori", y="Jumlah", title="Jumlah Spesies Flora dan Fauna")
-    st.plotly_chart(fig, use_container_width=True)
-
-# =====================
 # FUNGSI HUTAN
 # =====================
 
@@ -143,34 +124,55 @@ elif menu == "Fungsi Hutan":
     st.dataframe(df_fungsi_total, use_container_width=True)
 
 # =====================
-# KARBON
+# PROFIL SDA & JASA LINGKUNGAN (PENGGABUNGAN MENU)
 # =====================
 
-elif menu == "Karbon":
-    st.subheader("Analisis Volume Cadangan Karbon")
+elif menu == "Profil SDA & Jasa Lingkungan":
+    st.header("Profil Sumber Daya Alam dan Jasa Lingkungan")
+    st.write("Potensi kekayaan hayati, kapasitas karbon, dan objek wisata alam hutan Kalimantan Selatan.")
+    st.divider()
     
-    karbon = pd.DataFrame({
-        "Kategori": ["Cadangan Karbon", "Serapan Karbon Tahunan"],
-        "Nilai (Ton)": [172000000, 6400000]
-    })
-
-    st.dataframe(karbon)
-    fig = px.pie(karbon, names="Kategori", values="Nilai (Ton)", title="Perbandingan Volume Karbon")
-    st.plotly_chart(fig, use_container_width=True)
-
-# =====================
-# WISATA ALAM
-# =====================
-
-elif menu == "Wisata Alam":
-    st.subheader("Potensi Jasa Lingkungan Rekreasi")
+    # Sub-Bagian 1: Biodiversitas (Flora & Fauna)
+    st.subheader("1. Keanekaragaman Hayati (Biodiversitas)")
+    col_bio1, col_bio2 = st.columns([1, 2])
     
-    wisata = pd.DataFrame({
+    with col_bio1:
+        data_bio = pd.DataFrame({
+            "Kategori": ["Flora", "Fauna"],
+            "Jumlah Kerapatan Spesies": [3000, 500]
+        })
+        st.dataframe(data_bio, use_container_width=True)
+        
+    with col_bio2:
+        fig_bio = px.bar(data_bio, x="Kategori", y="Jumlah Kerapatan Spesies", title="Perbandingan Kerapatan Spesies Kehutanan")
+        st.plotly_chart(fig_bio, use_container_width=True)
+        
+    st.divider()
+    
+    # Sub-Bagian 2: Karbon
+    st.subheader("2. Kapasitas Volumetrik Cadangan Karbon")
+    col_kar1, col_kar2 = st.columns([1, 2])
+    
+    with col_kar1:
+        data_karbon = pd.DataFrame({
+            "Kategori Parameter": ["Cadangan Karbon Tetap", "Serapan Karbon Tahunan"],
+            "Volume (Ton)": [172000000, 6400000]
+        })
+        st.dataframe(data_karbon, use_container_width=True)
+        
+    with col_kar2:
+        fig_karbon = px.pie(data_karbon, names="Kategori Parameter", values="Volume (Ton)", title="Proporsi Distribusi Aspek Karbon")
+        st.plotly_chart(fig_karbon, use_container_width=True)
+        
+    st.divider()
+    
+    # Sub-Bagian 3: Wisata Alam
+    st.subheader("3. Jasa Lingkungan Wisata Rekreasi Alam")
+    data_wisata = pd.DataFrame({
         "Destinasi": ["Loksado", "Tahura Sultan Adam", "Pegunungan Meratus", "Air Terjun Haratai", "Pulau Kembang"],
-        "Kabupaten": ["Hulu Sungai Selatan", "Banjar/Banjarbaru", "Hulu Sungai Tengah", "Hulu Sungai Selatan", "Barito Kuala"]
+        "Kawasan Administratif": ["Hulu Sungai Selatan", "Banjar/Banjarbaru", "Hulu Sungai Tengah", "Hulu Sungai Selatan", "Barito Kuala"]
     })
-
-    st.dataframe(wisata, use_container_width=True)
+    st.dataframe(data_wisata, use_container_width=True)
 
 # =====================
 # KALKULATOR TEV
@@ -218,7 +220,7 @@ elif menu == "Kalkulator TEV":
 # =====================
 
 elif menu == "Analisis Trade-Off":
-    st.subheader("Simulasi Substitusi Alahan")
+    st.subheader("Simulasi Substitusi Lahan")
     
     tradeoff = pd.DataFrame({
         "Skenario": ["Hutan Lestari", "Konversi Sawit", "Eksploitasi Kayu"],
