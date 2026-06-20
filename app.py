@@ -8,7 +8,7 @@ from PIL import Image
 # =====================
 
 st.set_page_config(
-    page_title="Ekonomi Hutan Kalimantan Selatan",
+    page_title="ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN",
     layout="wide"
 )
 
@@ -62,7 +62,7 @@ with col1:
         st.warning("Logo tidak ditemukan")
 
 with col2:
-    st.title("Ekonomi Hutan Kalimantan Selatan")
+    st.title("ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN")
     st.write("Project Based Learning Ekonomi Sumber Daya Alam dan Lingkungan")
 
 st.divider()
@@ -101,6 +101,17 @@ if menu == "Beranda":
 
     st.write("Dashboard ini menyajikan data spasial dan valuasi ekonomi kehutanan Kalimantan Selatan.")
     st.dataframe(df_hutan.drop(columns=["Total Kawasan Hutan (ha)"]), use_container_width=True)
+    
+    st.divider()
+    st.subheader("Identitas Anggota Kelompok")
+    col_k1, col_k2, col_k3 = st.columns(3)
+    
+    with col_k1:
+        st.info("Anggota 1  \n**Ina Rani Amelia** \nNPM: 10090224002")
+    with col_k2:
+        st.success("Anggota 2  \n**Nayla Dwi Safitri** \nNPM: 10090224013")
+    with col_k3:
+        st.warning("Anggota 3  \n**Celi Maulidi Aprilia** \nNPM: 10090224027")
 
 # =====================
 # FUNGSI HUTAN
@@ -172,43 +183,50 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.dataframe(data_wisata, use_container_width=True)
 
 # =====================
-# KALKULATOR TEV
+# KALKULATOR TEV (SIMULASI DINAMIS)
 # =====================
 
 elif menu == "Kalkulator TEV":
     st.header("Kalkulator Total Economic Value (TEV)")
+    st.write("Simulasi valuasi nilai ekonomi total ekosistem hutan berdasarkan pendekatan fungsi manfaat spasial daerah.")
     
-    pilihan_wilayah = st.selectbox("Pilih Wilayah Analisis:", ["Total Provinsi"] + list(df_hutan["Kabupaten/Kota"]))
+    pilihan_wilayah = st.selectbox("Pilih Wilayah Analisis Simulasi:", ["Total Provinsi"] + list(df_hutan["Kabupaten/Kota"]))
     
     if pilihan_wilayah == "Total Provinsi":
         luas_analisis = total_luas_provinsi
+        asumsi_langsung = 6991011291
+        asumsi_tidak_langsung = 2497046942
     else:
-        luas_analisis = df_hutan[df_hutan["Kabupaten/Kota"] == pilihan_wilayah]["Total Kawasan Hutan (ha)"].values[0]
+        row_kab = df_hutan[df_hutan["Kabupaten/Kota"] == pilihan_wilayah].iloc[0]
+        luas_analisis = row_kab["Total Kawasan Hutan (ha)"]
+        proporsi = luas_analisis / total_luas_provinsi
+        asumsi_langsung = int(6991011291 * proporsi)
+        asumsi_tidak_langsung = int(2497046942 * proporsi)
         
-    st.write(f"Luas Kawasan Hutan Terpilih: {luas_analisis:,.2f} Hektar")
+    st.info(f"Luas Geografis Hutan Teranalisis: {luas_analisis:,.2f} Hektar")
     
     col1, col2 = st.columns(2)
     with col1:
-        nilai_langsung = st.number_input("Nilai Guna Langsung (Manfaat Hasil Kayu) - Rp/Tahun", value=int(luas_analisis * 5000))
-        nilai_regulasi = st.number_input("Nilai Pengaturan (Jasa Karbon & Oksigen) - Rp/Tahun", value=int(luas_analisis * 10000))
+        nilai_langsung = st.number_input("1. Nilai Guna Langsung (Manfaat Hasil Kayu Finansial) - Rp/Tahun", value=asumsi_langsung)
+        nilai_tidak_langsung = st.number_input("2. Nilai Guna Tidak Langsung (Fungsi Serapan Karbon & Oksigen) - Rp/Tahun", value=asumsi_tidak_langsung)
     with col2:
-        nilai_pilihan = st.number_input("Nilai Pilihan (Keanekaragaman Hayati) - Rp/Tahun", value=int(luas_analisis * 1500))
-        nilai_eksistensi = st.number_input("Nilai Eksistensi (Kelestarian Ekosistem) - Rp/Tahun", value=int(luas_analisis * 1500))
+        nilai_pilihan = st.number_input("3. Nilai Pilihan (Option Value Keanekaragaman Hayati Objek Wisata) - Rp/Tahun", value=int(luas_analisis * 15000))
+        nilai_eksistensi = st.number_input("4. Nilai Eksistensi (Existence Value Warisan Ekosistem) - Rp/Tahun", value=int(luas_analisis * 10000))
         
-    total_tev = nilai_langsung + nilai_regulasi + nilai_pilihan + nilai_eksistensi
-    st.metric(label=f"NILAI EKONOMI TOTAL (TEV) - {pilihan_wilayah.upper()}", value=f"Rp {total_tev:,.2f}")
+    total_tev = nilai_langsung + nilai_tidak_langsung + nilai_pilihan + nilai_eksistensi
+    st.metric(label=f"ESTIMASI TOTAL ECONOMIC VALUE (TEV) - {pilihan_wilayah.upper()}", value=f"Rp {total_tev:,.2f}")
     
-    st.subheader("Proporsi Kontribusi Struktur Nilai Ekonomi terhadap Ekosistem Hutan")
+    st.subheader("Struktur Komparasi Kontribusi Komponen Valuasi TEV")
     df_pie_tev = pd.DataFrame({
-        "Komponen Nilai": ["Guna Langsung", "Pengaturan/Regulasi", "Pilihan Masa Depan", "Eksistensi"],
-        "Nilai Ekonomi (Rp)": [nilai_langsung, nilai_regulasi, nilai_pilihan, nilai_eksistensi]
+        "Komponen Klasifikasi Nilai": ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"],
+        "Aset Valuasi Ekonomi (Rp)": [nilai_langsung, nilai_tidak_langsung, nilai_pilihan, nilai_eksistensi]
     })
     
     fig_pie_tev = px.pie(
         df_pie_tev, 
-        values="Nilai Ekonomi (Rp)", 
-        names="Komponen Nilai", 
-        title=f"Persentase Kontribusi Struktur TEV {pilihan_wilayah}"
+        values="Aset Valuasi Ekonomi (Rp)", 
+        names="Komponen Klasifikasi Nilai", 
+        title=f"Persentase Kontribusi Struktur Parameter TEV Kawasan {pilihan_wilayah}"
     )
     st.plotly_chart(fig_pie_tev, use_container_width=True)
 
