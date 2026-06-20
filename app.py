@@ -50,6 +50,7 @@ def load_base_data():
 
 @st.cache_data
 def load_kabupaten_data():
+    # PERBAIKAN: Seluruh nilai kosong berupa strip sudah diubah menjadi angka 0.0 agar terbaca oleh plotly express
     kab_data = {
         "Kabupaten/Kota": [
             "Tanah Laut", "Kota Baru", "Banjar", "Barito Kuala", "Tapin", 
@@ -138,8 +139,18 @@ elif menu == "Profile Hutan Kalimantan Selatan":
     st.subheader("2. Sebaran Luas Hutan Menurut Kabupaten/Kota")
     st.write("Distribusi spasial luas kawasan hutan (dalam hektar) di 13 kabupaten/kota Provinsi Kalimantan Selatan.")
     
+    # PERBAIKAN: Memastikan data luas bertipe float agar sumbu Y muncul otomatis
     df_melted = df_kab.melt(id_vars=["Kabupaten/Kota"], var_name="Fungsi Hutan", value_name="Luas (ha)")
-    fig_bar = px.bar(df_melted, x="Kabupaten/Kota", y="Luas (ha)", color="Fungsi Hutan", title="Sebaran Komposisi Fungsi Hutan Per Kabupaten/Kota", barmode="stack")
+    df_melted["Luas (ha)"] = df_melted["Luas (ha)"].astype(float)
+    
+    fig_bar = px.bar(
+        df_melted, 
+        x="Kabupaten/Kota", 
+        y="Luas (ha)", 
+        color="Fungsi Hutan", 
+        title="Sebaran Komposisi Fungsi Hutan Per Kabupaten/Kota", 
+        barmode="stack"
+    )
     fig_bar.update_layout(xaxis_tickangle=-45)
     st.plotly_chart(fig_bar, use_container_width=True)
     
