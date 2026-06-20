@@ -150,8 +150,9 @@ elif menu == "Profile Hutan Kalimantan Selatan":
     st.write("Data rincian luas fungsi kawasan hutan pada 13 wilayah administratif di Kalimantan Selatan.")
     st.dataframe(df_kabupaten, use_container_width=True)
     
-    st.write("#### Grafik Perbandingan Total Kawasan Hutan Antar Kabupaten/Kota (Hektar)")
-    st.bar_chart(data=df_kabupaten, x="Kabupaten/Kota", y="Total Kawasan Hutan (ha)")
+    st.write("#### Grafik Distribusi Luas Hutan Wilayah (Visualisasi Komparatif Area)")
+    df_area = df_kabupaten.set_index("Kabupaten/Kota")[["Total Kawasan Hutan (ha)"]]
+    st.area_chart(df_area)
     
     st.write("---")
     
@@ -214,12 +215,11 @@ elif menu == "Modul 1: Kalkulator TEV":
     else:
         persen_langsung = persen_regulasi = persen_pilihan = persen_eksistensi = 0
     
-    st.subheader("Proporsi Kontribusi Nilai terhadap Ekosistem")
+    st.subheader("Proporsi Kontribusi Nilai terhadap Ekosistem (Tren Kontribusi Line Chart)")
     chart_data = pd.DataFrame({
-        "Kategori Nilai": ["Guna Langsung", "Pengaturan/Regulasi", "Pilihan Masa Depan", "Eksistensi"],
         "Persentase (%)": [persen_langsung, persen_regulasi, persen_pilihan, persen_eksistensi]
-    })
-    st.bar_chart(data=chart_data, x="Kategori Nilai", y="Persentase (%)")
+    }, index=["Guna Langsung", "Pengaturan/Regulasi", "Pilihan Masa Depan", "Eksistensi"])
+    st.line_chart(data=chart_data)
 
 elif menu == "Modul 2: Trade-off Analisis":
     st.header("Modul 2: Analisis Substitusi Lahan (Hutan vs Perkebunan)")
