@@ -4,160 +4,206 @@ import plotly.express as px
 
 st.set_page_config(
     page_title="Ekonomi Hutan Kalimantan Selatan",
+    page_icon="🌳",
     layout="wide"
 )
 
-st.title("🌳 Ekonomi Hutan Kalimantan Selatan")
+# =====================
+# SIDEBAR
+# =====================
 
-menu = st.sidebar.selectbox(
+st.sidebar.title("🌳 Ekonomi Hutan")
+
+menu = st.sidebar.radio(
     "Pilih Menu",
     [
         "Beranda",
+        "Biodiversitas",
+        "Fungsi Hutan",
+        "Karbon",
+        "Wisata Alam",
         "Kalkulator TEV",
-        "Analisis Trade-off",
-        "Kebijakan PES",
-        "Studi Kasus"
+        "Analisis Trade-Off",
+        "PES"
     ]
 )
 
-# =========================
+# =====================
 # BERANDA
-# =========================
+# =====================
 
 if menu == "Beranda":
 
-    st.header("Profil Hutan Kalimantan Selatan")
+    st.title("Ekonomi Hutan Kalimantan Selatan")
 
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric("Flora", "3.000 Spesies")
-    col2.metric("Fauna", "500 Spesies")
-    col3.metric("Cadangan Karbon", "172 Juta Ton")
-    col4.metric("Wisata Alam", "12 Lokasi")
+    col1.metric("Flora", "3.000")
+    col2.metric("Fauna", "500")
+    col3.metric("Karbon", "172 Juta Ton")
+    col4.metric("Wisata", "12 Lokasi")
 
-    st.subheader("Jenis Tanaman Dominan")
+    st.markdown("""
+    Aplikasi ini menampilkan informasi ekonomi sumber daya hutan
+    Kalimantan Selatan yang meliputi biodiversitas, karbon,
+    jasa lingkungan, wisata alam, dan simulasi nilai ekonomi.
+    """)
 
-    tanaman = pd.DataFrame({
-        "Tanaman": [
-            "Ulin",
-            "Meranti",
-            "Keruing",
-            "Bangkirai",
-            "Kapur"
-        ]
+# =====================
+# BIODIVERSITAS
+# =====================
+
+elif menu == "Biodiversitas":
+
+    st.header("Biodiversitas Hutan Kalimantan Selatan")
+
+    df = pd.DataFrame({
+        "Kategori": ["Flora", "Fauna"],
+        "Jumlah": [3000, 500]
     })
 
-    st.dataframe(tanaman)
+    st.dataframe(df)
 
-    st.subheader("Komposisi Jenis Tegakan")
-
-    tegakan = pd.DataFrame({
-        "Jenis Tegakan": [
-            "Hutan Primer",
-            "Hutan Sekunder",
-            "Hutan Pegunungan",
-            "Hutan Mangrove",
-            "Hutan Rawa"
-        ],
-        "Persentase": [15,45,20,10,10]
-    })
-
-    fig = px.pie(
-        tegakan,
-        names="Jenis Tegakan",
-        values="Persentase"
+    fig = px.bar(
+        df,
+        x="Kategori",
+        y="Jumlah",
+        title="Jumlah Keanekaragaman Hayati"
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
-# =========================
+# =====================
+# FUNGSI HUTAN
+# =====================
+
+elif menu == "Fungsi Hutan":
+
+    st.header("Fungsi Hutan")
+
+    fungsi = pd.DataFrame({
+        "Fungsi": [
+            "Penyerap Karbon",
+            "Pengatur Tata Air",
+            "Pencegah Erosi",
+            "Habitat Satwa",
+            "Wisata Alam"
+        ]
+    })
+
+    st.dataframe(fungsi)
+
+# =====================
+# KARBON
+# =====================
+
+elif menu == "Karbon":
+
+    st.header("Cadangan Karbon")
+
+    karbon = pd.DataFrame({
+        "Kategori": [
+            "Cadangan Karbon",
+            "Serapan Karbon Tahunan"
+        ],
+        "Nilai": [
+            172000000,
+            6400000
+        ]
+    })
+
+    st.dataframe(karbon)
+
+    fig = px.pie(
+        karbon,
+        names="Kategori",
+        values="Nilai",
+        title="Distribusi Karbon"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# =====================
+# WISATA ALAM
+# =====================
+
+elif menu == "Wisata Alam":
+
+    st.header("Wisata Alam Kalimantan Selatan")
+
+    wisata = pd.DataFrame({
+        "Destinasi": [
+            "Loksado",
+            "Tahura Sultan Adam",
+            "Pegunungan Meratus",
+            "Air Terjun Haratai",
+            "Pulau Kembang"
+        ]
+    })
+
+    st.dataframe(wisata)
+
+# =====================
 # TEV
-# =========================
+# =====================
 
 elif menu == "Kalkulator TEV":
 
-    st.header("Kalkulator Total Economic Value (TEV)")
+    st.header("Kalkulator Total Economic Value")
 
     luas = st.number_input(
         "Luas Hutan (ha)",
-        min_value=0.0,
-        value=100000.0
+        value=100000
     )
 
-    flora = st.number_input(
-        "Jumlah Flora",
-        min_value=0,
-        value=3000
+    direct_use = luas * 250000
+    indirect_use = luas * 450000
+    option_value = luas * 150000
+    existence_value = luas * 100000
+
+    total = (
+        direct_use +
+        indirect_use +
+        option_value +
+        existence_value
     )
 
-    fauna = st.number_input(
-        "Jumlah Fauna",
-        min_value=0,
-        value=500
-    )
-
-    karbon = st.number_input(
-        "Cadangan Karbon (ton)",
-        min_value=0.0,
-        value=172000000.0
-    )
-
-    wisata = st.number_input(
-        "Jumlah Objek Wisata",
-        min_value=0,
-        value=12
-    )
-
-    if st.button("Hitung TEV"):
-
-        direct_use = luas * 0.00025
-        environmental = luas * 0.00045
-        option_value = luas * 0.00015
-        existence_value = luas * 0.00015
-
-        total_tev = (
-            direct_use +
-            environmental +
-            option_value +
+    tev = pd.DataFrame({
+        "Komponen": [
+            "Direct Use",
+            "Indirect Use",
+            "Option Value",
+            "Existence Value"
+        ],
+        "Nilai": [
+            direct_use,
+            indirect_use,
+            option_value,
             existence_value
-        )
+        ]
+    })
 
-        hasil = pd.DataFrame({
-            "Komponen": [
-                "Nilai Guna Langsung",
-                "Nilai Pengaturan Lingkungan",
-                "Nilai Pilihan",
-                "Nilai Eksistensi"
-            ],
-            "Nilai": [
-                direct_use,
-                environmental,
-                option_value,
-                existence_value
-            ]
-        })
+    st.dataframe(tev)
 
-        st.dataframe(hasil)
+    st.success(
+        f"Total Economic Value = Rp {total:,.0f}"
+    )
 
-        st.success(
-            f"Total Economic Value (TEV): Rp {total_tev:.2f} Miliar/Tahun"
-        )
+    fig = px.pie(
+        tev,
+        names="Komponen",
+        values="Nilai"
+    )
 
-        fig = px.pie(
-            hasil,
-            names="Komponen",
-            values="Nilai"
-        )
+    st.plotly_chart(fig, use_container_width=True)
 
-        st.plotly_chart(fig, use_container_width=True)
-
-# =========================
+# =====================
 # TRADE OFF
-# =========================
+# =====================
 
-elif menu == "Analisis Trade-off":
+elif menu == "Analisis Trade-Off":
 
-    st.header("Analisis Trade-off Pemanfaatan Hutan")
+    st.header("Analisis Trade-Off")
 
     tradeoff = pd.DataFrame({
         "Skenario": [
@@ -182,86 +228,30 @@ elif menu == "Analisis Trade-off":
     st.plotly_chart(fig, use_container_width=True)
 
     st.info(
-        "Skenario hutan lestari memberikan nilai ekonomi total yang lebih tinggi dibandingkan konversi lahan maupun eksploitasi kayu."
+        "Hutan lestari memberikan nilai ekonomi tertinggi."
     )
 
-# =========================
+# =====================
 # PES
-# =========================
+# =====================
 
-elif menu == "Kebijakan PES":
+elif menu == "PES":
 
-    st.header("Payment for Ecosystem Services (PES)")
-
-    harga_karbon = st.number_input(
-        "Harga Karbon (Rp/Ton)",
-        value=150000
-    )
+    st.header("Payment for Ecosystem Services")
 
     karbon = st.number_input(
         "Cadangan Karbon (Ton)",
         value=172000000
     )
 
-    if st.button("Hitung PES"):
-
-        pes = harga_karbon * karbon
-
-        st.success(
-            f"Potensi Pendapatan PES: Rp {pes:,.0f}"
-        )
-
-# =========================
-# STUDI KASUS
-# =========================
-
-elif menu == "Studi Kasus":
-
-    st.header("Studi Kasus Hutan Kalimantan Selatan")
-
-    lokasi = st.selectbox(
-        "Pilih Lokasi",
-        [
-            "Pegunungan Meratus",
-            "Loksado",
-            "Tahura Sultan Adam",
-            "Pulau Kembang"
-        ]
+    harga = st.number_input(
+        "Harga Karbon (Rp/Ton)",
+        value=150000
     )
 
-    data = {
-        "Pegunungan Meratus": {
-            "Biodiversitas": "Tinggi",
-            "Karbon": "Sangat Tinggi",
-            "Wisata": "Ekowisata"
-        },
-        "Loksado": {
-            "Biodiversitas": "Tinggi",
-            "Karbon": "Tinggi",
-            "Wisata": "Bamboo Rafting"
-        },
-        "Tahura Sultan Adam": {
-            "Biodiversitas": "Sedang",
-            "Karbon": "Tinggi",
-            "Wisata": "Wisata Alam"
-        },
-        "Pulau Kembang": {
-            "Biodiversitas": "Sedang",
-            "Karbon": "Sedang",
-            "Wisata": "Konservasi Satwa"
-        }
-    }
+    pes = karbon * harga
 
-    st.subheader(lokasi)
-
-    st.write(
-        f"Biodiversitas: {data[lokasi]['Biodiversitas']}"
-    )
-
-    st.write(
-        f"Karbon: {data[lokasi]['Karbon']}"
-    )
-
-    st.write(
-        f"Potensi Wisata: {data[lokasi]['Wisata']}"
+    st.metric(
+        "Potensi Pendapatan PES",
+        f"Rp {pes:,.0f}"
     )
