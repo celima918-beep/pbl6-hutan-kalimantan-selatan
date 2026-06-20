@@ -44,7 +44,7 @@ total_hpk = df_hutan["Hutan Produksi Konversi (ha)"].sum()
 total_luas_provinsi = df_hutan["Total Kawasan Hutan (ha)"].sum()
 
 # =====================
-# LOGO, JUDUL UTAMA & IDENTITAS KELOMPOK
+# LOGO, JUDUL UTAMA & ATRIBUSI AKADEMIK
 # =====================
 
 try:
@@ -65,14 +65,19 @@ with col_header2:
     st.title("ECO-FOREST VALUATION HUTAN KALIMANTAN SELATAN")
     st.write("Project Based Learning Ekonomi Sumber Daya Alam dan Lingkungan")
     
-    # Penempatan struktur data identitas kelompok di bawah judul utama
+    # Penambahan Judul Kelompok dan Pemberian Warna Berbasis Markdown HTML
+    st.markdown("<span style='color: #1E3A8A; font-weight: bold; font-size: 16px;'>ANGGOTA KELOMPOK 9 :</span>", unsafe_allow_html=True)
+    
     col_k1, col_k2, col_k3 = st.columns(3)
     with col_k1:
-        st.caption("Anggota 1: **Ina Rani Amelia** (NPM: 10090224002)")
+        st.markdown("<span style='color: #047857; font-weight: 500;'>1. Ina Rani Amelia</span> <span style='color: #6B7280;'>(NPM: 10090224002)</span>", unsafe_allow_html=True)
     with col_k2:
-        st.caption("Anggota 2: **Nayla Dwi Safitri** (NPM: 10090224013)")
+        st.markdown("<span style='color: #B45309; font-weight: 500;'>2. Nayla Dwi Safitri</span> <span style='color: #6B7280;'>(NPM: 10090224013)</span>", unsafe_allow_html=True)
     with col_k3:
-        st.caption("Anggota 3: **Celi Maulidi Aprilia** (NPM: 10090224027)")
+        st.markdown("<span style='color: #4338CA; font-weight: 500;'>3. Celi Maulidi Aprilia</span> <span style='color: #6B7280;'>(NPM: 10090224027)</span>", unsafe_allow_html=True)
+    
+    # Penambahan Data Dosen Pengampu
+    st.markdown("<div style='margin-top: 5px;'><span style='color: #374151; font-weight: bold;'>Dosen Pengampu :</span> <span style='color: #DC2626; font-weight: bold;'>Yuhka Sundaya</span></div>", unsafe_allow_html=True)
 
 st.divider()
 
