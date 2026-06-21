@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 from PIL import Image
 
@@ -165,7 +166,6 @@ elif menu == "Fungsi Hutan":
     st.dataframe(df_fungsi_total, use_container_width=True)
     
     total_produksi = total_hpt + total_hp + total_hpk
-    total_proteksi = total_lindung + total_suaka
     rasio_produksi = (total_produksi / total_luas_provinsi) * 100
     
     st.divider()
@@ -269,7 +269,7 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.markdown(analisis_sda, unsafe_allow_html=True)
 
 # =====================
-# KALKULATOR TEV (FITUR SIMULASI KERUSAKAN & DEGRADASI BARU)
+# KALKULATOR TEV
 # =====================
 
 elif menu == "Kalkulator TEV":
@@ -286,7 +286,6 @@ elif menu == "Kalkulator TEV":
         
     st.info(f"Luas Geografis Hutan Teranalisis: {luas_analisis:,.2f} Hektar")
     
-    # Pembagian grid input: parameter tarif dasar dan parameter kerusakan
     col_input1, col_input2 = st.columns(2)
     
     with col_input1:
@@ -301,17 +300,14 @@ elif menu == "Kalkulator TEV":
         tingkat_deforestasi = st.slider("Tingkat Deforestasi (Persentase Luas Hutan yang Hilang)", min_value=0.0, max_value=100.0, value=15.0, step=0.5)
         faktor_degradasi_fungsi = st.slider("Penurunan Kualitas Ekosistem (Degradasi Fungsi Non-Pasar)", min_value=0.0, max_value=100.0, value=25.0, step=0.5)
         
-    # Perhitungan dampak kerusakan fisik
     luas_tersisa = luas_analisis * (1 - (tingkat_deforestasi / 100))
     
-    # Kalkulasi TEV Kondisi Ideal Baseline
     nilai_langsung_ideal = int(luas_analisis * tarif_langsung)
     nilai_tidak_langsung_ideal = int(luas_analisis * tarif_tidak_langsung)
     nilai_pilihan_ideal = int(luas_analisis * tarif_pilihan)
     nilai_eksistensi_ideal = int(luas_analisis * tarif_eksistensi)
     total_tev_ideal = nilai_langsung_ideal + nilai_tidak_langsung_ideal + nilai_pilihan_ideal + nilai_eksistensi_ideal
     
-    # Kalkulasi TEV Riil Pasca Kerusakan Lingkungan
     nilai_langsung_nyata = int(luas_tersisa * tarif_langsung)
     pengali_kualitas = 1 - (faktor_degradasi_fungsi / 100)
     nilai_tidak_langsung_nyata = int(luas_tersisa * tarif_tidak_langsung * pengali_kualitas)
@@ -319,20 +315,17 @@ elif menu == "Kalkulator TEV":
     nilai_eksistensi_nyata = int(luas_tersisa * tarif_eksistensi * pengali_kualitas)
     total_tev_nyata = nilai_langsung_nyata + nilai_tidak_langsung_nyata + nilai_pilihan_nyata + nilai_eksistensi_nyata
     
-    # Perhitungan nilai ekonomi yang hilang (Marginal Cost Lingkungan)
     total_kerugian = total_tev_ideal - total_tev_nyata
     persen_kerugian = (total_kerugian / total_tev_ideal) * 100 if total_tev_ideal > 0 else 0
     
     st.divider()
     
-    # Tampilan Dashboard Metrik Komparasi Kerusakan
     st.subheader("Hasil Estimasi Dampak Ekonomi")
     col_m1, col_m2, col_m3 = st.columns(3)
     col_m1.metric(label="TEV Kondisi Ideal Baseline", value=f"Rp {total_tev_ideal:,.2f}")
     col_m2.metric(label="TEV Riil Pasca Degradasi", value=f"Rp {total_tev_nyata:,.2f}", delta=f"-Rp {total_kerugian:,.2f}", delta_color="inverse")
     col_m3.metric(label="Total Kerugian Ekonomi (Marginal Cost)", value=f"Rp {total_kerugian:,.2f}", delta=f"{persen_kerugian:.2f}% Penurunan", delta_color="inverse")
     
-    # Menyiapkan data untuk visualisasi grafik batang komparatif berkelompok
     df_visual_tev = pd.DataFrame({
         "Komponen Klasifikasi Nilai": ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"] * 2,
         "Nilai Moneter (Rp)": [nilai_langsung_ideal, nilai_tidak_langsung_ideal, nilai_pilihan_ideal, nilai_eksistensi_ideal,
@@ -432,7 +425,7 @@ elif menu == "Analisis Trade-Off":
     <div style="background-color: #FFFBEB; padding: 20px; border-left: 6px solid #D97706; border-radius: 4px;">
         <h4 style="color: #92400E; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Akumulasi kerusakan lahan akibat pembukaan hutan sepanjang dekade terakhir sangat masif dengan total kehilangan mencapai <span style="color: #B91C1C; font-weight: bold;">{total_deforestasi:,.0f} hektar</span> tutupan rimba. Dampak degradasi fisik ini berkorelasi langsung terhadap tingginya frekuensi bencana eksternalitas negatif dengan catatan total <span style="color: #B91C1C; font-weight: bold;">{total_banjir} kali kejadian banjir</span> merusak pemukiman warga. Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> dan pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Angka ini secara ilmiah menunjukkan bahwa pilihan pembangunan ekstraktif tidak lagi layak dipertahankan karena memicu marginal cost sosial yang jauh lebih besar daripada revenue finansial privat yang dihasilkan.
+            Akumulasi kerusakan lahan akibat pembukaan hutan sepanjang dekade terakhir sangat masif dengan total kehilangan mencapai <span style="color: #B91C1C; font-weight: bold;">{total_deforestasi:,.0f} hektar</span> tutupan rimba. Dampak degradasi fisik ini berkorelasi langsung terhadap tingginya frekuensi bencana eksternalitas negatif dengan catatan total <span style="color: #B91C1C; font-weight: bold;">{total_banjir} kali kejadian banjir</span> merusak pemukiman warga. Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> and pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Angka ini secara ilmiah menunjukkan bahwa pilihan pembangunan ekstraktif tidak lagi layak dipertahankan karena memicu marginal cost sosial yang jauh lebih besar daripada revenue finansial privat yang dihasilkan.
         </p>
     </div>
     """
@@ -442,29 +435,89 @@ elif menu == "Analisis Trade-Off":
     st.markdown(analisis_tradeoff, unsafe_allow_html=True)
 
 # =====================
-# PES
+# PES (PENGEMBANGAN GRAFIK & PERBANDINGAN POTENSI JASA EKOSISTEM)
 # =====================
 
 elif menu == "PES":
-    st.subheader("Simulasi Imbal Jasa Lingkungan")
+    st.header("Simulasi Imbal Jasa Lingkungan (Payment for Ecosystem Services)")
+    st.write("Analisis potensi penerimaan daerah melalui mekanisme pasar karbon pasar internasional dan perbandingan elastisitas nilai antar jasa ekosistem.")
+    st.divider()
     
-    karbon_input = st.number_input("Cadangan Karbon Terfiksasi (Ton)", value=113000000)
-    harga_input = st.number_input("Harga Karbon Berdasarkan Regulasi Pasar (Rp/Ton)", value=150000)
-    
+    # Grid Input Parameter PES
+    col_pes_in1, col_pes_in2 = st.columns(2)
+    with col_pes_in1:
+        karbon_input = st.number_input("Volume Cadangan Karbon Terfiksasi (Ton CO2)", value=113000000)
+    with col_pes_in2:
+        harga_input = st.number_input("Harga Karbon Acuan Regulasi Pasar (Rp/Ton CO2)", value=150000)
+        
     hasil = karbon_input * harga_input
-    st.metric("Potensi Pendapatan Penerimaan Jasa Ekosistem (PES)", f"Rp {hasil:,.0f}")
+    st.metric("Total Potensi Pendapatan Penerimaan Jasa Ekosistem (PES)", f"Rp {hasil:,.0f}")
+    st.divider()
     
+    # 1. PENAMBAHAN GRAFIK SIMULASI PES (Dinamika Pendapatan Berdasarkan Skenario Harga)
+    st.subheader("1. Grafik Simulasi Sensitivitas Pendapatan PES Karbon")
+    st.write("Grafik di bawah memproyeksikan perubahan total pendapatan daerah berdasarkan fluktuasi harga karbon di pasar internasional pada volume cadangan tetap.")
+    
+    rentang_harga = np.linspace(50000, 300000, 10)
+    proyeksi_pendapatan = karbon_input * rentang_harga
+    
+    df_simulasi_pes = pd.DataFrame({
+        "Harga Karbon Pasar (Rp/Ton)": rentang_harga,
+        "Proyeksi Penerimaan Daerah (Rp)": Proyeksi_pendapatan
+    })
+    
+    fig_pes_line = px.line(
+        df_simulasi_pes,
+        x="Harga Karbon Pasar (Rp/Ton)",
+        y="Proyeksi Penerimaan Daerah (Rp)",
+        markers=True,
+        title="Kurva Elastisitas Penerimaan Finansial PES Terhadap Harga Karbon Global",
+        color_discrete_sequence=["#7C3AED"]
+    )
+    st.plotly_chart(fig_pes_line, use_container_width=True)
+    st.divider()
+    
+    # 2. PENAMBAHAN SEKSYEN PERBANDINGAN POTENSI JASA EKOSISTEM
+    st.subheader("2. Matriks Perbandingan Potensi Antar Jasa Ekosistem Hutan")
+    st.write("Perbandingan nilai moneter teoritis tahunan antar jenis pelayanan fungsi alam (Ecosystem Services) di Kalimantan Selatan.")
+    
+    # Menggunakan pendekatan nilai rata-rata per hektar untuk visualisasi potensi sektoral
+    nilai_regulasi_air = luas_analisis * 25000
+    nilai_wisata_alam = luas_analisis * 12000
+    nilai_opsi_farmasi = luas_analisis * 8000
+    
+    df_komparasi_jasa = pd.DataFrame({
+        "Klasifikasi Jasa Ekosistem": ["Penyerapan Karbon (PES)", "Regulasi Siklus Hidrologi", "Ekowisata & Rekreasi", "Opsi Keanekaragaman Farmasi"],
+        "Estimasi Potensi Nilai (Rp/Tahun)": [hasil, nilai_regulasi_air, nilai_wisata_alam, nilai_opsi_farmasi],
+        "Kategori Fungsi": ["Regulasi", "Regulasi", "Kultural", "Pilihan"]
+    })
+    
+    col_jasa1, col_jasa2 = st.columns([3, 2])
+    with col_jasa1:
+        fig_bar_jasa = px.bar(
+            df_komparasi_jasa,
+            x="Estimasi Potensi Nilai (Rp/Tahun)",
+            y="Klasifikasi Jasa Ekosistem",
+            orientation="h",
+            color="Kategori Fungsi",
+            title="Perbandingan Skala Ekonomi Potensi Jasa Ekosistem Hutan",
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        st.plotly_chart(fig_bar_jasa, use_container_width=True)
+    with col_jasa2:
+        st.write("Tabel Rincian Kontribusi Nilai Jasa Ekosistem")
+        st.table(df_komparasi_jasa)
+        
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
     
-    deskripsi_pes = "Menu PES (Payment for Ecosystem Services) atau Imbal Jasa Lingkungan mensimulasikan instrumen pasar modern untuk konservasi. Sistem mengalkulasi potensi penerimaan dana segar yang diperoleh daerah melalui skema perdagangan karbon internasional."
+    deskripsi_pes = "Menu PES (Payment for Ecosystem Services) atau Imbal Jasa Lingkungan menerapkan model kurva linear sensitivitas pasar untuk memetakan risiko harga instrumen karbon global. Penambahan matriks komparasi jasa ekosistem menyajikan perbandingan empiris kontribusi nilai ekonomi non-pasar secara sektoral."
     
     analisis_pes = f"""
     <div style="background-color: #FAF5FF; padding: 20px; border-left: 6px solid #7C3AED; border-radius: 4px;">
         <h4 style="color: #5B21B6; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Simulasi menunjukkan potensi penerimaan keuangan daerah yang sangat masif sebesar <span style="color: #1D4ED8; font-weight: bold;">Rp {hasil:,.0f}</span> 
-            dari hasil optimalisasi insentif pasar internasional dengan asumsi harga patokan nilai sebesar <span style="color: #B45309; font-weight: bold;">Rp {harga_input:,.0f}</span> per ton karbon. Skema perdagangan karbon merubah paradigma pengelolaan lingkungan dari pusat beban pembiayaan pasif menjadi motor penggerak pendapatan asli daerah yang prospektif. Dana kompensasi non-ekstraktif ini wajib didistribusikan secara berkeadilan untuk mendanai program insentif pelestarian hutan rakyat oleh masyarakat lokal. Pendekatan insentif ekonomi ini menciptakan keselarasan jangka panjang antara target pertumbuhan ekonomi makro wilayah dan komitmen penurunan emisi gas rumah kaca global.
+            Analisis kurva sensitivitas menunjukkan potensi penerimaan keuangan daerah yang sangat masif sebesar <span style="color: #1D4ED8; font-weight: bold;">Rp {hasil:,.0f}</span> dari hasil penjualan kredit karbon terfiksasi pada asumsi harga patokan nilai sebesar <span style="color: #B45309; font-weight: bold;">Rp {harga_input:,.0f}</span> per ton. Melalui visualisasi grafik komparasi jasa ekosistem, nilai ekonomi dari fungsi regulasi iklim terbukti mendominasi struktur modal alam non-pasar jauh melampaui potensi kultural ekowisata dan opsi farmasi. Realitas empiris ini membuktikan bahwa mempertahankan tutupan hutan sebagai penyerap karbon memberikan return sosial ekonomi yang jauh lebih stabil dibanding mengonversinya menjadi lahan industri ekstraktif. Dana kompensasi non-ekstraktif dari skema pasar internasional ini wajib dialokasikan secara berkeadilan untuk mendanai program insentif pelestarian hutan oleh masyarakat lokal guna menjamin keberlanjutan pasokan jasa lingkungan dalam jangka panjang.
         </p>
     </div>
     """
