@@ -188,7 +188,7 @@ elif menu == "Fungsi Hutan":
     st.markdown(analisis_fungsi, unsafe_allow_html=True)
 
 # =====================
-# PROFIL SDA & JASA LINGKUNGAN (INTEGRASI DATA BARU)
+# PROFIL SDA & JASA LINGKUNGAN
 # =====================
 
 elif menu == "Profil SDA & Jasa Lingkungan":
@@ -196,7 +196,6 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.write("Potensi kekayaan keanekaragaman hayati riil, kapasitas emisi serapan karbon, dan statistik industri ekowisata.")
     st.divider()
     
-    # 1. Biodiversitas (Data Baru Lampiran 1)
     st.subheader("1. Keanekaragaman Hayati (Biodiversitas)")
     col_bio1, col_bio2 = st.columns(2)
     
@@ -222,7 +221,6 @@ elif menu == "Profil SDA & Jasa Lingkungan":
         
     st.divider()
     
-    # 2. Emisi & Serapan Karbon (Data Baru Lampiran 2)
     st.subheader("2. Kapasitas Volumetrik Keseimbangan Karbon Berkelanjutan")
     df_karbon = pd.DataFrame({
         "Tahun": ["2019", "2020", "2021", "2022", "2023", "2024"],
@@ -236,7 +234,6 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     
     st.divider()
     
-    # 3. Wisata Hutan (Data Baru Lampiran 3)
     st.subheader("3. Jasa Lingkungan Wisata Rekreasi Alam")
     df_wisata = pd.DataFrame({
         "Destinasi": ["Tahura Sultan Adam", "Pulau Kembang", "Loksado", "Air Terjun Haratai", "Meratus Trek"],
@@ -272,12 +269,12 @@ elif menu == "Profil SDA & Jasa Lingkungan":
     st.markdown(analisis_sda, unsafe_allow_html=True)
 
 # =====================
-# KALKULATOR TEV
+# KALKULATOR TEV (FITUR SIMULASI KERUSAKAN & DEGRADASI BARU)
 # =====================
 
 elif menu == "Kalkulator TEV":
-    st.header("Kalkulator Total Economic Value (TEV)")
-    st.write("Simulasi valuasi nilai ekonomi total ekosistem hutan menggunakan slider interaktif untuk mengatur asumsi nilai per hektar.")
+    st.header("Kalkulator Total Economic Value (TEV) & Simulasi Degradasi")
+    st.write("Simulasi valuasi nilai ekonomi total ekosistem hutan serta analisis skenario kehilangan nilai akibat kerusakan lingkungan.")
     
     pilihan_wilayah = st.selectbox("Pilih Wilayah Analisis Simulasi:", ["Total Provinsi"] + list(df_hutan["Kabupaten/Kota"]))
     
@@ -289,54 +286,86 @@ elif menu == "Kalkulator TEV":
         
     st.info(f"Luas Geografis Hutan Teranalisis: {luas_analisis:,.2f} Hektar")
     
-    st.subheader("Geser untuk Mengatur Asumsi Nilai Manfaat Ekosistem (Rp / Hektar / Tahun)")
-    col_sl1, col_sl2 = st.columns(2)
-    with col_sl1:
-        tarif_langsung = st.slider("Asumsi Nilai Guna Langsung (Hasil Kayu Finansial)", min_value=1000, max_value=50000, value=15000, step=500)
-        tarif_tidak_langsung = st.slider("Asumsi Nilai Guna Tidak Langsung (Fungsi Karbon & Oksigen)", min_value=1000, max_value=50000, value=20000, step=500)
-    with col_sl2:
-        tarif_pilihan = st.slider("Asumsi Nilai Pilihan (Keanekaragaman Hayati & Wisata)", min_value=1000, max_value=50000, value=15000, step=500)
-        tarif_eksistensi = st.slider("Asumsi Nilai Eksistensi (Warisan Kelestarian Hutan)", min_value=1000, max_value=50000, value=10000, step=500)
+    # Pembagian grid input: parameter tarif dasar dan parameter kerusakan
+    col_input1, col_input2 = st.columns(2)
+    
+    with col_input1:
+        st.subheader("1. Nilai Manfaat Dasar (Rp / Hektar / Tahun)")
+        tarif_langsung = st.slider("Nilai Guna Langsung (Hasil Kayu Finansial)", min_value=1000, max_value=50000, value=15000, step=500)
+        tarif_tidak_langsung = st.slider("Nilai Guna Tidak Langsung (Karbon & Oksigen)", min_value=1000, max_value=50000, value=20000, step=500)
+        tarif_pilihan = st.slider("Nilai Pilihan (Keanekaragaman Hayati & Wisata)", min_value=1000, max_value=50000, value=15000, step=500)
+        tarif_eksistensi = st.slider("Nilai Eksistensi (Warisan Kelestarian Hutan)", min_value=1000, max_value=50000, value=10000, step=500)
         
-    nilai_langsung = int(luas_analisis * tarif_langsung)
-    nilai_tidak_langsung = int(luas_analisis * tarif_tidak_langsung)
-    nilai_pilihan = int(luas_analisis * tarif_pilihan)
-    nilai_eksistensi = int(luas_analisis * tarif_eksistensi)
+    with col_input2:
+        st.subheader("2. Parameter Kerusakan & Degradasi Hutan")
+        tingkat_deforestasi = st.slider("Tingkat Deforestasi (Persentase Luas Hutan yang Hilang)", min_value=0.0, max_value=100.0, value=15.0, step=0.5)
+        faktor_degradasi_fungsi = st.slider("Penurunan Kualitas Ekosistem (Degradasi Fungsi Non-Pasar)", min_value=0.0, max_value=100.0, value=25.0, step=0.5)
+        
+    # Perhitungan dampak kerusakan fisik
+    luas_tersisa = luas_analisis * (1 - (tingkat_deforestasi / 100))
     
-    total_tev = nilai_langsung + nilai_tidak_langsung + nilai_pilihan + nilai_eksistensi
-    st.metric(label=f"ESTIMASI TOTAL ECONOMIC VALUE (TEV) - {pilihan_wilayah.upper()}", value=f"Rp {total_tev:,.2f}")
+    # Kalkulasi TEV Kondisi Ideal Baseline
+    nilai_langsung_ideal = int(luas_analisis * tarif_langsung)
+    nilai_tidak_langsung_ideal = int(luas_analisis * tarif_tidak_langsung)
+    nilai_pilihan_ideal = int(luas_analisis * tarif_pilihan)
+    nilai_eksistensi_ideal = int(luas_analisis * tarif_eksistensi)
+    total_tev_ideal = nilai_langsung_ideal + nilai_tidak_langsung_ideal + nilai_pilihan_ideal + nilai_eksistensi_ideal
     
-    st.subheader("Struktur Komparasi Kontribusi Komponen Valuasi TEV")
-    df_pie_tev = pd.DataFrame({
-        "Komponen Klasifikasi Nilai": ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"],
-        "Aset Valuasi Ekonomi (Rp)": [nilai_langsung, nilai_tidak_langsung, nilai_pilihan, nilai_eksistensi]
+    # Kalkulasi TEV Riil Pasca Kerusakan Lingkungan
+    nilai_langsung_nyata = int(luas_tersisa * tarif_langsung)
+    pengali_kualitas = 1 - (faktor_degradasi_fungsi / 100)
+    nilai_tidak_langsung_nyata = int(luas_tersisa * tarif_tidak_langsung * pengali_kualitas)
+    nilai_pilihan_nyata = int(luas_tersisa * tarif_pilihan * pengali_kualitas)
+    nilai_eksistensi_nyata = int(luas_tersisa * tarif_eksistensi * pengali_kualitas)
+    total_tev_nyata = nilai_langsung_nyata + nilai_tidak_langsung_nyata + nilai_pilihan_nyata + nilai_eksistensi_nyata
+    
+    # Perhitungan nilai ekonomi yang hilang (Marginal Cost Lingkungan)
+    total_kerugian = total_tev_ideal - total_tev_nyata
+    persen_kerugian = (total_kerugian / total_tev_ideal) * 100 if total_tev_ideal > 0 else 0
+    
+    st.divider()
+    
+    # Tampilan Dashboard Metrik Komparasi Kerusakan
+    st.subheader("Hasil Estimasi Dampak Ekonomi")
+    col_m1, col_m2, col_m3 = st.columns(3)
+    col_m1.metric(label="TEV Kondisi Ideal Baseline", value=f"Rp {total_tev_ideal:,.2f}")
+    col_m2.metric(label="TEV Riil Pasca Degradasi", value=f"Rp {total_tev_nyata:,.2f}", delta=f"-Rp {total_kerugian:,.2f}", delta_color="inverse")
+    col_m3.metric(label="Total Kerugian Ekonomi (Marginal Cost)", value=f"Rp {total_kerugian:,.2f}", delta=f"{persen_kerugian:.2f}% Penurunan", delta_color="inverse")
+    
+    # Menyiapkan data untuk visualisasi grafik batang komparatif berkelompok
+    df_visual_tev = pd.DataFrame({
+        "Komponen Klasifikasi Nilai": ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"] * 2,
+        "Nilai Moneter (Rp)": [nilai_langsung_ideal, nilai_tidak_langsung_ideal, nilai_pilihan_ideal, nilai_eksistensi_ideal,
+                               nilai_langsung_nyata, nilai_tidak_langsung_nyata, nilai_pilihan_nyata, nilai_eksistensi_nyata],
+        "Skenario Kondisi Hutan": ["Kondisi Ideal Baseline"] * 4 + ["Pasca Deforestasi & Degradasi"] * 4
     })
     
-    fig_pie_tev = px.pie(
-        df_pie_tev, 
-        values="Aset Valuasi Ekonomi (Rp)", 
-        names="Komponen Klasifikasi Nilai", 
-        title=f"Persentase Kontribusi Struktur Parameter TEV Kawasan {pilihan_wilayah}",
-        color_discrete_sequence=px.colors.sequential.YlGnBu
+    fig_perbandingan_tev = px.bar(
+        df_visual_tev,
+        x="Komponen Klasifikasi Nilai",
+        y="Nilai Moneter (Rp)",
+        color="Skenario Kondisi Hutan",
+        barmode="group",
+        title=f"Analisis Komparatif Kerusakan Struktur TEV Kawasan {pilihan_wilayah}",
+        color_discrete_sequence=["#16A34A", "#DC2626"]
     )
-    st.plotly_chart(fig_pie_tev, use_container_width=True)
-    
-    nilai_non_pasar = nilai_tidak_langsung + nilai_pilihan + nilai_eksistensi
-    persen_non_pasar = (nilai_non_pasar / total_tev) * 100
+    st.plotly_chart(fig_perbandingan_tev, use_container_width=True)
     
     st.divider()
     st.subheader("Deskripsi dan Tinjauan Analisis")
     
-    deskripsi_tev = "Menu Kalkulator TEV menerapkan kerangka kerja ekonomi lingkungan untuk mengkuantifikasi nilai moneter total dari ekosistem hutan. Formulasi merangkum nilai guna langsung, nilai tidak langsung, nilai pilihan, dan nilai eksistensi non-pasar."
+    deskripsi_tev = "Menu Kalkulator TEV menerapkan model simulasi kerusakan dinamis untuk mendeteksi penyusutan aset modal alam. Integrasi variabel deforestasi spasial dan koefisien degradasi ekosistem menyajikan estimasi biaya kerusakan lingkungan yang riil."
     
     analisis_tev = f"""
-    <div style="background-color: #EFF6FF; padding: 20px; border-left: 6px solid #2563EB; border-radius: 4px;">
-        <h4 style="color: #1E40AF; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
+    <div style="background-color: #FFFBEB; padding: 20px; border-left: 6px solid #D97706; border-radius: 4px;">
+        <h4 style="color: #92400E; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Hasil simulasi pada kawasan {pilihan_wilayah} membuktikan secara empiris bahwa nilai ekonomi total didominasi oleh fungsi non-pasar yaitu nilai guna tidak langsung, pilihan, dan eksistensi dengan akumulasi nilai 
-            <span style="color: #1D4ED8; font-weight: bold;">Rp {nilai_non_pasar:,.2f}</span> atau setara 
-            <span style="color: #15803D; font-weight: bold;">{persen_non_pasar:.2f}%</span> dari total nilai ekonomi kawasan. Temuan ini mematahkan argumen bahwa hutan hanya bernilai saat ditebang untuk diambil kayunya yang saat ini dikalkulasi hanya berkontribusi sebesar 
-            <span style="color: #B91C1C; font-weight: bold;">Rp {nilai_langsung:,.2f}</span>. Kegagalan dalam menginternalisasi nilai non-pasar ini ke dalam kebijakan pembangunan akan menyebabkan terjadinya eksploitasi lahan yang berlebihan akibat salah urus penilaian aset alam.
+            Simulasi kerusakan pada ekosistem hutan {pilihan_wilayah} membuktikan bahwa kombinasi deforestasi lahan sebesar 
+            <span style="color: #B91C1C; font-weight: bold;">{tingkat_deforestasi}%</span> dan degradasi kualitas fungsi ekologis sebesar 
+            <span style="color: #B91C1C; font-weight: bold;">{faktor_degradasi_fungsi}%</span> memicu dampak finansial negatif yang sangat masif. Kerusakan tersebut mereduksi nilai ekonomi kawasan dari Rp {total_tev_ideal:,.2f} menjadi tersisa hanya 
+            <span style="color: #15803D; font-weight: bold;">Rp {total_tev_nyata:,.2f}</span>. Hal ini menimbulkan kerugian ekonomi eksternalitas atau marginal cost sosial sebesar 
+            <span style="color: #B91C1C; font-weight: bold;">Rp {total_kerugian:,.2f}</span>, yang setara dengan kehilangan 
+            <span style="color: #B91C1C; font-weight: bold;">{persen_kerugian:.2f}%</span> dari total kapasitas utilitas modal alam. Penyusutan nilai terbesar terkonsentrasi pada fungsi non-pasar seperti nilai guna tidak langsung dan eksistensi. Fakta empiris ini menegaskan bahwa kegagalan mengendalikan laju kerusakan hutan akan membebankan biaya pemulihan ekologis yang jauh melampaui keuntungan ekonomi jangka pendek dari eksploitasi lahan.
         </p>
     </div>
     """
@@ -346,7 +375,7 @@ elif menu == "Kalkulator TEV":
     st.markdown(analisis_tev, unsafe_allow_html=True)
 
 # =====================
-# ANALISIS TRADE-OFF (INTEGRASI DATA BARU DEFORESTASI & RISIKO)
+# ANALISIS TRADE-OFF
 # =====================
 
 elif menu == "Analisis Trade-Off":
@@ -357,7 +386,6 @@ elif menu == "Analisis Trade-Off":
     col_to1, col_to2 = st.columns(2)
     
     with col_to1:
-        # 4. Deforestasi (Data Baru Lampiran 4)
         st.subheader("Tren Akumulasi Kehilangan Hutan (Deforestasi)")
         df_defor = pd.DataFrame({
             "Tahun": ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"],
@@ -368,7 +396,6 @@ elif menu == "Analisis Trade-Off":
         st.plotly_chart(fig_defor, use_container_width=True)
         
     with col_to2:
-        # 5. Risiko Lingkungan (Data Baru Lampiran 5)
         st.subheader("Korelasi Risiko Indikator Lingkungan")
         df_risiko = pd.DataFrame({
             "Tahun": ["2019", "2020", "2021", "2022", "2023", "2024"],
