@@ -327,7 +327,6 @@ elif menu == "Kalkulator TEV":
     col_m2.metric(label="TEV Riil Pasca Degradasi", value=f"Rp {total_tev_nyata:,.2f}", delta=f"-Rp {total_kerugian:,.2f}", delta_color="inverse")
     col_m3.metric(label="Total Kerugian Ekonomi (Marginal Cost)", value=f"Rp {total_kerugian:,.2f}", delta=f"{persen_kerugian:.2f}% Penurunan", delta_color="inverse")
     
-    # PERBAIKAN GRAFIK 1: MENGGUNAKAN RADAR CHART UNTUK PERBANDINGAN STRUKTUR TEV MULTI-VARIABEL
     categories = ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"]
     
     fig_perbandingan_tev = go.Figure()
@@ -467,9 +466,21 @@ elif menu == "PES":
     
     col_pes_in1, col_pes_in2 = st.columns(2)
     with col_pes_in1:
-        karbon_input = st.number_input("Volume Cadangan Karbon Terfiksasi (Ton CO2)", value=113000000)
+        karbon_input = st.slider(
+            "Volume Cadangan Karbon Terfiksasi (Ton CO2)", 
+            min_value=10000000, 
+            max_value=200000000, 
+            value=113000000, 
+            step=1000000
+        )
     with col_pes_in2:
-        harga_input = st.number_input("Harga Karbon Acuan Regulasi Pasar (Rp/Ton CO2)", value=150000)
+        harga_input = st.slider(
+            "Harga Karbon Acuan Regulasi Pasar (Rp/Ton CO2)", 
+            min_value=50000, 
+            max_value=500000, 
+            value=150000, 
+            step=5000
+        )
         
     hasil = karbon_input * harga_input
     st.metric("Total Potensi Pendapatan Penerimaan Jasa Ekosistem (PES)", f"Rp {hasil:,.0f}")
@@ -514,7 +525,6 @@ elif menu == "PES":
     
     col_jasa1, col_jasa2 = st.columns([3, 2])
     with col_jasa1:
-        # PERBAIKAN GRAFIK 2: MENGGUNAKAN FUNNEL CHART UNTUK TINGKATAN KONTRIBUSI SEKTORAL JASA EKOSISTEM
         fig_bar_jasa = go.Figure(go.Funnel(
             y=df_komparasi_jasa["Klasifikasi Jasa Ekosistem"],
             x=df_komparasi_jasa["Estimasi Potensi Nilai (Rp/Tahun)"],
