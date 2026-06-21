@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from PIL import Image
 
 # =====================
@@ -326,22 +327,43 @@ elif menu == "Kalkulator TEV":
     col_m2.metric(label="TEV Riil Pasca Degradasi", value=f"Rp {total_tev_nyata:,.2f}", delta=f"-Rp {total_kerugian:,.2f}", delta_color="inverse")
     col_m3.metric(label="Total Kerugian Ekonomi (Marginal Cost)", value=f"Rp {total_kerugian:,.2f}", delta=f"{persen_kerugian:.2f}% Penurunan", delta_color="inverse")
     
-    df_visual_tev = pd.DataFrame({
-        "Komponen Klasifikasi Nilai": ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"] * 2,
-        "Nilai Moneter (Rp)": [nilai_langsung_ideal, nilai_tidak_langsung_ideal, nilai_pilihan_ideal, nilai_eksistensi_ideal,
-                               nilai_langsung_nyata, nilai_tidak_langsung_nyata, nilai_pilihan_nyata, nilai_eksistensi_nyata],
-        "Skenario Kondisi Hutan": ["Kondisi Ideal Baseline"] * 4 + ["Pasca Deforestasi & Degradasi"] * 4
-    })
+    # PERBAIKAN GRAFIK 1: MENGGUNAKAN RADAR CHART UNTUK PERBANDINGAN STRUKTUR TEV MULTI-VARIABEL
+    categories = ["Guna Langsung", "Guna Tidak Langsung", "Nilai Pilihan", "Nilai Eksistensi"]
     
-    fig_perbandingan_tev = px.bar(
-        df_visual_tev,
-        x="Komponen Klasifikasi Nilai",
-        y="Nilai Moneter (Rp)",
-        color="Skenario Kondisi Hutan",
-        barmode="group",
-        title=f"Analisis Komparatif Kerusakan Struktur TEV Kawasan {pilihan_wilayah}",
-        color_discrete_sequence=["#16A34A", "#DC2626"]
+    fig_perbandingan_tev = go.Figure()
+    
+    fig_perbandingan_tev.add_trace(go.Scatterpolar(
+        r=[nilai_langsung_ideal, nilai_tidak_langsung_ideal, nilai_pilihan_ideal, nilai_eksistensi_ideal],
+        theta=categories,
+        fill="toself",
+        name="Kondisi Ideal Baseline",
+        fillcolor="rgba(22, 163, 74, 0.2)",
+        line=dict(color="#16A34A", width=3)
+    ))
+    
+    fig_perbandingan_tev.add_trace(go.Scatterpolar(
+        r=[nilai_langsung_nyata, nilai_tidak_langsung_nyata, nilai_pilihan_nyata, nilai_eksistensi_nyata],
+        theta=categories,
+        fill="toself",
+        name="Pasca Deforestasi & Degradasi",
+        fillcolor="rgba(220, 38, 38, 0.2)",
+        line=dict(color="#DC2626", width=3)
+    ))
+    
+    fig_perbandingan_tev.update_layout(
+        polar=dict(
+            radialaxis=dict(visible=True, showline=True, gridcolor="#E5E7EB"),
+            angularaxis=dict(gridcolor="#E5E7EB")
+        ),
+        showlegend=True,
+        title=dict(
+            text=f"Analisis Kerusakan Komparatif Struktur TEV Kawasan {pilihan_wilayah}",
+            font=dict(size=16)
+        ),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
     )
+    
     st.plotly_chart(fig_perbandingan_tev, use_container_width=True)
     
     st.divider()
@@ -488,18 +510,34 @@ elif menu == "PES":
         "Kategori Fungsi": ["Regulasi", "Regulasi", "Kultural", "Pilihan"]
     })
     
+    df_komparasi_jasa = df_komparasi_jasa.sort_values(by="Estimasi Potensi Nilai (Rp/Tahun)", ascending=False)
+    
     col_jasa1, col_jasa2 = st.columns([3, 2])
     with col_jasa1:
-        fig_bar_jasa = px.bar(
-            df_komparasi_jasa,
-            x="Estimasi Potensi Nilai (Rp/Tahun)",
-            y="Klasifikasi Jasa Ekosistem",
-            orientation="h",
-            color="Kategori Fungsi",
-            title="Perbandingan Skala Ekonomi Potensi Jasa Ekosistem Hutan",
-            color_discrete_sequence=px.colors.qualitative.Pastel
+        # PERBAIKAN GRAFIK 2: MENGGUNAKAN FUNNEL CHART UNTUK TINGKATAN KONTRIBUSI SEKTORAL JASA EKOSISTEM
+        fig_bar_jasa = go.Figure(go.Funnel(
+            y=df_komparasi_jasa["Klasifikasi Jasa Ekosistem"],
+            x=df_komparasi_jasa["Estimasi Potensi Nilai (Rp/Tahun)"],
+            textposition="inside",
+            textinfo="value+percent initial",
+            marker=dict(
+                color=["#4C1D95", "#6D28D9", "#8B5CF6", "#A78BFA"],
+                line=dict(width=1, color="#E5E7EB")
+            ),
+            connector=dict(line=dict(color="#C084FC", width=2))
+        ))
+        
+        fig_bar_jasa.update_layout(
+            title=dict(
+                text="Struktur Hirarki Kontribusi Skala Ekonomi Potensi Jasa Ekosistem",
+                font=dict(size=16)
+            ),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            showlegend=False
         )
         st.plotly_chart(fig_bar_jasa, use_container_width=True)
+        
     with col_jasa2:
         st.write("Tabel Rincian Kontribusi Nilai Jasa Ekosistem")
         st.table(df_komparasi_jasa)
@@ -513,7 +551,7 @@ elif menu == "PES":
     <div style="background-color: #FAF5FF; padding: 20px; border-left: 6px solid #7C3AED; border-radius: 4px;">
         <h4 style="color: #5B21B6; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Analisis kurva sensitivitas menunjukkan potensi penerimaan keuangan daerah yang sangat masif sebesar <span style="color: #1D4ED8; font-weight: bold;">Rp {hasil:,.0f}</span> dari hasil penjualan kredit karbon terfiksasi pada asumsi harga patokan nilai sebesar <span style="color: #B45309; font-weight: bold;">Rp {harga_input:,.0f}</span> per ton. Melalui visualisasi grafik komparasi jasa ekosistem, nilai ekonomi dari fungsi regulasi iklim terbukti mendominasi struktur modal alam non-pasar jauh melampaui potensi kultural ekowisata dan opsi farmasi. Realitas empiris ini membuktikan bahwa mempertahankan tutupan hutan sebagai penyerap karbon memberikan return sosial ekonomi yang jauh lebih stabil dibanding mengonversinya menjadi lahan industri ekstraktif. Dana kompensasi non-ekstraktif dari skema pasar internasional ini wajib dialokasikan secara berkeadilan untuk mendanai program insentif pelestarian hutan oleh masyarakat lokal guna menjamin keberlanjutan pasokan jasa lingkungan dalam jangka panjang.
+            Analisis kurva sensitivitas menunjukkan potensi penerimaan keuangan daerah yang sangat masif sebesar <span style="color: #1D4ED8; font-weight: bold;">Rp {hasil:,.0f}</span> dari hasil penjualan kredit karbon terfiksasi pada asumsi harga patokan nilai sebesar <span style="color: #B45309; font-weight: bold;">Rp {harga_input:,.0f}</span> per ton. Melalui visualisasi grafik komparasi jasa ekosistem, nilai ekonomi dari fungsi regulasi iklim terbukti mendominasi struktur modal alam non-pasar jauh melampaui potensi kultural ekowisata dan opsi farmasi. Realitas empiris ini membuktikan bahwa mempertahankan tutupan hutan sebagai penyerap karbon memberikan return sosial ekonomi yang jauh lebih stabil dibanding mengonversinya menjadi lahan industri extractive. Dana kompensasi non-ekstraktif dari skema pasar internasional ini wajib dialokasikan secara berkeadilan untuk mendanai program insentif pelestarian hutan oleh masyarakat lokal guna menjamin keberlanjutan pasokan jasa lingkungan dalam jangka panjang.
         </p>
     </div>
     """
