@@ -425,7 +425,7 @@ elif menu == "Analisis Trade-Off":
     <div style="background-color: #FFFBEB; padding: 20px; border-left: 6px solid #D97706; border-radius: 4px;">
         <h4 style="color: #92400E; margin-top: 0;">Hasil Analisis Ekonomi Lingkungan:</h4>
         <p style="color: #1F2937; line-height: 1.6; margin-bottom: 0;">
-            Akumulasi kerusakan lahan akibat pembukaan hutan sepanjang dekade terakhir sangat masif dengan total kehilangan mencapai <span style="color: #B91C1C; font-weight: bold;">{total_deforestasi:,.0f} hektar</span> tutupan rimba. Dampak degradasi fisik ini berkorelasi langsung terhadap tingginya frekuensi bencana eksternalitas negatif dengan catatan total <span style="color: #B91C1C; font-weight: bold;">{total_banjir} kali kejadian banjir</span> merusak pemukiman warga. Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> and pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Angka ini secara ilmiah menunjukkan bahwa pilihan pembangunan ekstraktif tidak lagi layak dipertahankan karena memicu marginal cost sosial yang jauh lebih besar daripada revenue finansial privat yang dihasilkan.
+            Akumulasi kerusakan lahan akibat pembukaan hutan sepanjang dekade terakhir sangat masif dengan total kehilangan mencapai <span style="color: #B91C1C; font-weight: bold;">{total_deforestasi:,.0f} hektar</span> tutupan rimba. Dampak degradasi fisik ini berkorelasi langsung terhadap tingginya frekuensi bencana eksternalitas negatif dengan catatan total <span style="color: #B91C1C; font-weight: bold;">{total_banjir} kali kejadian banjir</span> merusak pemukiman warga. Saat target kelayakan jangka panjang dipatok pada angka <span style="color: #15803D; font-weight: bold;">{bobot_konservasi}%</span>, skenario konversi kelapa sawit hanya mampu mencapai indeks kelayakan <span style="color: #B45309; font-weight: bold;">{kelayakan_sawit}%</span> dan pembalakan kayu turun drastis ke angka <span style="color: #B91C1C; font-weight: bold;">{kelayakan_kayu}%</span>. Angka ini secara ilmiah menunjukkan bahwa pilihan pembangunan ekstraktif tidak lagi layak dipertahankan karena memicu marginal cost sosial yang jauh lebih besar daripada revenue finansial privat yang dihasilkan.
         </p>
     </div>
     """
@@ -435,15 +435,14 @@ elif menu == "Analisis Trade-Off":
     st.markdown(analisis_tradeoff, unsafe_allow_html=True)
 
 # =====================
-# PES (PENGEMBANGAN GRAFIK & PERBANDINGAN POTENSI JASA EKOSISTEM)
+# PES 
 # =====================
 
 elif menu == "PES":
     st.header("Simulasi Imbal Jasa Lingkungan (Payment for Ecosystem Services)")
-    st.write("Analisis potensi penerimaan daerah melalui mekanisme pasar karbon pasar internasional dan perbandingan elastisitas nilai antar jasa ekosistem.")
+    st.write("Analisis potensi penerimaan daerah melalui mekanisme pasar karbon internasional dan perbandingan elastisitas nilai antar jasa ekosistem.")
     st.divider()
     
-    # Grid Input Parameter PES
     col_pes_in1, col_pes_in2 = st.columns(2)
     with col_pes_in1:
         karbon_input = st.number_input("Volume Cadangan Karbon Terfiksasi (Ton CO2)", value=113000000)
@@ -454,7 +453,6 @@ elif menu == "PES":
     st.metric("Total Potensi Pendapatan Penerimaan Jasa Ekosistem (PES)", f"Rp {hasil:,.0f}")
     st.divider()
     
-    # 1. PENAMBAHAN GRAFIK SIMULASI PES (Dinamika Pendapatan Berdasarkan Skenario Harga)
     st.subheader("1. Grafik Simulasi Sensitivitas Pendapatan PES Karbon")
     st.write("Grafik di bawah memproyeksikan perubahan total pendapatan daerah berdasarkan fluktuasi harga karbon di pasar internasional pada volume cadangan tetap.")
     
@@ -463,7 +461,7 @@ elif menu == "PES":
     
     df_simulasi_pes = pd.DataFrame({
         "Harga Karbon Pasar (Rp/Ton)": rentang_harga,
-        "Proyeksi Penerimaan Daerah (Rp)": Proyeksi_pendapatan
+        "Proyeksi Penerimaan Daerah (Rp)": proyeksi_pendapatan
     })
     
     fig_pes_line = px.line(
@@ -477,14 +475,12 @@ elif menu == "PES":
     st.plotly_chart(fig_pes_line, use_container_width=True)
     st.divider()
     
-    # 2. PENAMBAHAN SEKSYEN PERBANDINGAN POTENSI JASA EKOSISTEM
     st.subheader("2. Matriks Perbandingan Potensi Antar Jasa Ekosistem Hutan")
     st.write("Perbandingan nilai moneter teoritis tahunan antar jenis pelayanan fungsi alam (Ecosystem Services) di Kalimantan Selatan.")
     
-    # Menggunakan pendekatan nilai rata-rata per hektar untuk visualisasi potensi sektoral
-    nilai_regulasi_air = luas_analisis * 25000
-    nilai_wisata_alam = luas_analisis * 12000
-    nilai_opsi_farmasi = luas_analisis * 8000
+    nilai_regulasi_air = total_luas_provinsi * 25000
+    nilai_wisata_alam = total_luas_provinsi * 12000
+    nilai_opsi_farmasi = total_luas_provinsi * 8000
     
     df_komparasi_jasa = pd.DataFrame({
         "Klasifikasi Jasa Ekosistem": ["Penyerapan Karbon (PES)", "Regulasi Siklus Hidrologi", "Ekowisata & Rekreasi", "Opsi Keanekaragaman Farmasi"],
